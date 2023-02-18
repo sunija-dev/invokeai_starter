@@ -13,5 +13,6 @@ namespace invokeai_starter
     /// </summary>
     public partial class App : Application
     {
+
     }
 }
