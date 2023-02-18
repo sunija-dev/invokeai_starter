@@ -1,0 +1,31 @@
+﻿<Window x:Class="invokeai_starter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:invokeai_starter"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" AllowsTransparency="True" WindowStyle="None" Background="#FF1A1A20">
+    <Grid>
+        <Border BorderBrush="#FF6A6A6A" BorderThickness="1" HorizontalAlignment="Left" Height="430" Margin="15,10,0,0" VerticalAlignment="Top" Width="365"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="590,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic"><Run Text="inofficial standalone "/><Run Text="by Sunija"/></TextBlock>
+        <Image HorizontalAlignment="Left" Height="41" Margin="605,10,0,0" VerticalAlignment="Top" Width="185" Source="images/invokeai_logo_2_3_0.png"/>
+        <CheckBox Content="NSFW filter active" HorizontalAlignment="Left" Margin="30,67,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
+        <CheckBox Content="Share access (requires restart)" HorizontalAlignment="Left" Margin="30,100,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
+        <TextBlock HorizontalAlignment="Left" Margin="40,172,0,0" TextWrapping="Wrap" Text="To access within your wi-fi, use this link:" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
+        <TextBlock HorizontalAlignment="Left" Margin="40,231,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"><Run Text="To access from the internet:"/><LineBreak/><Run/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="40,123,0,0" TextWrapping="Wrap" Text="Use InvokeAI on other devices (e.g. your tablet) and lets friends join via the internet." VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325"/>
+        <TextBlock HorizontalAlignment="Left" Margin="40,255,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325"><Run Text="1) Open port 9090 TCP on your router. "/><LineBreak/><Run Text="(If you don't know what that means: Google &quot;[The name of your router or internet provider] open port&quot;. That should give you a tutorial.)"/><LineBreak/><Run/><LineBreak/><Run Text="2) Use the following link on your device:"/><LineBreak/></TextBlock>
+        <Button Content="Start InvokeAI" HorizontalAlignment="Left" Margin="411,348,0,0" VerticalAlignment="Top" Width="360" Height="92" Background="#FF2E2E2E" Foreground="#FFC9C9C9" FontWeight="Bold" FontSize="36" FontFamily="Segoe UI Light" BorderBrush="#FFFFBF10"/>
+        <TextBlock HorizontalAlignment="Left" Margin="51,198,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
+        <Button Content="Copy" HorizontalAlignment="Left" Margin="232,196,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
+        <TextBlock HorizontalAlignment="Left" Margin="51,360,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
+        <Button Content="Copy" HorizontalAlignment="Left" Margin="232,358,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
+        <TextBlock HorizontalAlignment="Left" Margin="442,324,0,0" TextWrapping="Wrap" Text="InvokeAI should work on your system. &lt;3" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
+        <TextBlock HorizontalAlignment="Left" Margin="40,386,0,-48" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325" Text="Only share this link with people that you trust!"/>
+        <TextBlock HorizontalAlignment="Left" Margin="399,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="11" Width="391"><Run Text="Hi! To use InvokeAI, you have to agree to the following license."/><LineBreak/><Run/><LineBreak/><Run Text="TL;DR: The CreativeML OpenRAIL License"/><LineBreak/><LineBreak/><Run Text="1. You can't use the model to deliberately produce nor share illegal or harmful outputs or content"/><LineBreak/><Run Text="2. CompVis claims no rights on the outputs you generate, you are free to use them and are accountable for their use which must not go against the provisions set in the license"/><LineBreak/><Run Text="3. You may re-distribute the weights and use the model commercially and/or as a service. If you do, please be aware you have to include the same use restrictions as the ones in the license and share a copy of the CreativeML OpenRAIL-M to all your users (please read the license entirely and carefully)"/><LineBreak/><Run/><LineBreak/><Run Text="Please read the full license here: "/><LineBreak/><Run Text="https://huggingface.co/spaces/CompVis/stable-diffusion-license"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="30,23,0,0" TextWrapping="Wrap" Text="Options" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" FontWeight="Bold"/>
+
+    </Grid>
+</Window>
