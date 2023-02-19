@@ -64,6 +64,7 @@ namespace invokeai_starter
             InitializeComponent();
 
             strExeFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            strExeFolderPath = strExeFolderPath.Replace('\\', '/');
             //strExeFolderPath = "E:\\invokeai_2_3_0_standalone";
             strSettingsPath = System.IO.Path.Combine(strExeFolderPath, c_strSettingsName);
 
@@ -90,17 +91,7 @@ namespace invokeai_starter
             textInternetAddress.Text = strInternetAddress;
 
             // edit python file
-            string strPythonFilePath = System.IO.Path.Combine(strExeFolderPath, "env\\Lib\\site-packages\\ldm\\invoke\\globals.py");
-            try
-            {
-                string strPythonFile = System.IO.File.ReadAllText(strPythonFilePath);
-                strPythonFile = strPythonFile.Replace("~/invokeai", System.IO.Path.Combine(strExeFolderPath, "invokeai"));
-                System.IO.File.WriteAllText(strPythonFilePath, strPythonFile);
-            }
-            catch
-            {
-                Console.WriteLine($"Could not override {strPythonFilePath}");
-            }
+            SetPathInPythonFile();
   
             // check that license is accepted
             // -> remove license text + change button text + button action
@@ -146,7 +137,30 @@ namespace invokeai_starter
             Process.Start("http://localhost:9090");
         }
 
+        private void SetPathInPythonFile()
+        {
+            string strPythonFilePath = System.IO.Path.Combine(strExeFolderPath, "env\\Lib\\site-packages\\ldm\\invoke\\globals.py");
+            string strInjectedPath = System.IO.Path.Combine(strExeFolderPath, "invokeai");
 
+            try
+            {
+                string[] arInitFileLines = System.IO.File.ReadAllLines(strPythonFilePath);
+                for (int i = 0; i < arInitFileLines.Length; i++)
+                {
+                    string strLine = arInitFileLines[i];
+                    if (strLine.StartsWith("    Globals.root = osp.abspath(osp.expanduser("))
+                    {
+                        arInitFileLines[i] = $"    Globals.root = osp.abspath(osp.expanduser(\'{strInjectedPath}\'))";
+                        break;
+                    }
+                }
+                System.IO.File.WriteAllLines(strPythonFilePath, arInitFileLines);
+            }
+            catch
+            {
+                Console.WriteLine($"Could not override {strPythonFilePath}");
+            }
+        }
 
         private void SaveSettings()
         {
@@ -427,6 +441,13 @@ namespace invokeai_starter
 
             if (processInvokeAi != null)
                 processInvokeAi.Close();
+        }
+
+        private void OnConfigurator(object sender, RoutedEventArgs e)
+        {
+            string strPath = System.IO.Path.Combine(strExeFolderPath, "env/Scripts/invoke.exe"); //invokeai-configure.exe
+            if (System.IO.File.Exists(strPath))
+                Process.Start(System.IO.Path.Combine(strExeFolderPath, "install_models.bat"));
         }
     }
 }
