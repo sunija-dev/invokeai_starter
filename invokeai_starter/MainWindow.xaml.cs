@@ -342,6 +342,12 @@ namespace invokeai_starter
                 strProblem += "\nGPU is not the newest.";
             }
 
+            if (strGPUName.ToLower().Contains("1650"))
+            {
+                iWorks = 0;
+                strProblem += "\nYour graphics card (GTX 1650) is not supported. :(";
+            }
+
             if (iWorks == 2)
                 strOutput += "Should work! <3";
             else if (iWorks == 1)
