@@ -21,6 +21,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace invokeai_starter
 {
@@ -54,7 +55,11 @@ namespace invokeai_starter
         {
             public bool bFirstStart = true;
             public bool bAcceptedLicense = false;
+            public bool bStartDirectly = true;
         }
+
+        private BackendState backendState = BackendState.Stopped;
+        private enum BackendState { Stopped, Loading, Running }
 
 
         public MainWindow()
@@ -63,60 +68,53 @@ namespace invokeai_starter
 
             InitializeComponent();
 
+            // create paths
             strExeFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             strExeFolderPath = strExeFolderPath.Replace('\\', '/');
-            //strExeFolderPath = "E:\\invokeai_2_3_0_standalone";
+#if DEBUG
+            strExeFolderPath = "E:\\invokeai_2_3_0_standalone"; // use my local path for testing
+#endif
             strSettingsPath = System.IO.Path.Combine(strExeFolderPath, c_strSettingsName);
 
+            // init/load everything
             LoadSettings();
+            GetParameters();
+            GenerateIPLinks();
+
+            InitUI();
 
             // if first start: create desktop shortcut
             if (starterSettings.bFirstStart)
                 CreateDesktopShortcut();
 
-            starterSettings.bFirstStart = false;
-
-            strCheckForIssues();
-
-            // get settings
-            GetParameters();
-
-            checkNsfw.IsChecked = bNsfwFilter;
-            checkShareAccess.IsChecked = bShareAccess;
-
-            // get ip links
-            GenerateIPLinks();
-
-            textInternalAddress.Text = strInternalAddress;
-            textInternetAddress.Text = strInternetAddress;
-
-            // edit python file
-            SetPathInPythonFile();
-  
             // check that license is accepted
-            // -> remove license text + change button text + button action
             if (starterSettings.bAcceptedLicense)
-                OnLicenseAccepted();
+                LoadStarter();
         }
 
-        private void OnLicenseAccepted()
+        private void LoadStarter()
         {
             textLicense.Text = "";
 
-            starterSettings.bAcceptedLicense = true;
-
             buttonStart.Content = "Start InvokeAI";
             textFeedback.Text = strCheckForIssues();
+
+            if (starterSettings.bStartDirectly)
+                StartInvoke();
         }
 
-        private void StartInvokeAI()
+        private void StartInvoke()
         {
             // apply settings
             SetParameters();
 
             // run bat file that starts invokeai
-            processInvokeAi = Process.Start(System.IO.Path.Combine(strExeFolderPath, "helper.bat"));
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = System.IO.Path.Combine(strExeFolderPath, "helper.bat");
+            processStartInfo.WorkingDirectory = strExeFolderPath;
+            processInvokeAi = Process.Start(processStartInfo);
 
+            backendState = BackendState.Loading;
             buttonStart.Content = "Loading...";
 
             Task.Run(WaitForInvokeToLoad);
@@ -128,39 +126,183 @@ namespace invokeai_starter
             cancelSource = new CancellationTokenSource();
             await CheckForOpenPort(new TimeSpan(1), cancelSource.Token);
 
+            // invoke loaded!
+
+            backendState = BackendState.Running;
+
             this.Dispatcher.Invoke(() =>
             {
-                buttonStart.Content = "Running";
+                buttonStart.Content = "Stop";
             });
 
             // open browser window
             Process.Start("http://localhost:9090");
         }
 
-        private void SetPathInPythonFile()
+        public async Task CheckForOpenPort(TimeSpan interval, CancellationToken cancellationToken)
         {
-            string strPythonFilePath = System.IO.Path.Combine(strExeFolderPath, "env\\Lib\\site-packages\\ldm\\invoke\\globals.py");
-            string strInjectedPath = System.IO.Path.Combine(strExeFolderPath, "invokeai");
-
-            try
+            while (true)
             {
-                string[] arInitFileLines = System.IO.File.ReadAllLines(strPythonFilePath);
-                for (int i = 0; i < arInitFileLines.Length; i++)
-                {
-                    string strLine = arInitFileLines[i];
-                    if (strLine.StartsWith("    Globals.root = osp.abspath(osp.expanduser("))
-                    {
-                        arInitFileLines[i] = $"    Globals.root = osp.abspath(osp.expanduser(\'{strInjectedPath}\'))";
-                        break;
-                    }
-                }
-                System.IO.File.WriteAllLines(strPythonFilePath, arInitFileLines);
-            }
-            catch
-            {
-                Console.WriteLine($"Could not override {strPythonFilePath}");
+                if (cancellationToken.IsCancellationRequested || PortInUse(9090))
+                    return;
+                else
+                    await Task.Delay(interval, cancellationToken);
             }
         }
+
+        private string strCheckForIssues()
+        {
+            string strOutput = "";
+            int iWorks = 2; // yes, maybe, no
+            string strProblem = "";
+
+            string strGPUName = "";
+            float fGPUMemory = 0f;
+            float fRAMInGB = 0f;
+
+            // get gpu info
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_VideoController");
+            foreach (ManagementObject obj in searcher.Get())
+            {
+                strGPUName = obj["Name"].ToString();
+            }
+
+            NvAPIWrapper.GPU.PhysicalGPU[] arGPUs = NvAPIWrapper.GPU.PhysicalGPU.GetPhysicalGPUs();
+            foreach (NvAPIWrapper.GPU.PhysicalGPU gpu in arGPUs)
+            {
+                fGPUMemory = gpu.MemoryInformation.DedicatedVideoMemoryInkB;
+                fGPUMemory = fGPUMemory / 1024f / 1024f;
+                if (gpu.FullName.ToLower().Contains("nvidia"))
+                    break; // for now, we stop at the first nvidia gpu. Could be expanded for systems with multiple nvidia gpus
+            }
+
+            // get ram info
+            searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
+            foreach (ManagementObject obj in searcher.Get())
+            {
+                long memory = Convert.ToInt64(obj["TotalPhysicalMemory"]);
+                fRAMInGB = memory / 1024f / 1024f / 1024f;
+            }
+
+            strOutput = $"Your graphics card: {strGPUName} ({fGPUMemory} GB)\n";
+
+            if (fGPUMemory < 3.9f)
+            {
+                iWorks = 0;
+                strProblem += "\nNot enough GPU memory. Needs at least 4 GB.";
+            }
+
+            if (fRAMInGB < 11f)
+            {
+                iWorks = 1;
+                strProblem += "\nAI images needs at least 12 GB of memory (RAM). It might work, but the first loading time will be reaaaaally long (~10 min).";
+            }
+
+            if (strExeFolderPath.Contains(" "))
+            {
+                iWorks = 0;
+                strProblem += $"\nPath contains space! Please rename all folders, so they don't contain spaces." +
+                    $"\nBAD EXAMPLE:  D:/my folder/invokeai/" +
+                    $"\nGOOD EXAMPLE: D:/myfolder/invokeai/" +
+                    $"\n\nYour path: {strExeFolderPath}";
+            }
+
+            if (strExeFolderPath.Contains("[") || strExeFolderPath.Contains("("))
+            {
+                iWorks = 0;
+                strProblem += $"\nPath contains special characters! Please rename all folders, so they don't contain special characters." +
+                    $"\nProblematic characters: [], (), cyrillic alphabet, other non-latin characters, etc." +
+                    $"\n\nYour path: {strExeFolderPath}";
+            }
+
+            if (strGPUName.ToLower().Contains("amd")
+                || strGPUName.ToLower().Contains("ati")
+                || strGPUName.ToLower().Contains("radeon"))
+            {
+                iWorks = 0;
+                strProblem += "\nAMD graphic cards won't work. :( They will only work on Linux with a proper installation of InvokeAI.";
+            }
+            else if (strGPUName.ToLower().Contains("intel"))
+            {
+                iWorks = 1;
+                strProblem += "\nYour PC appears to not have a dedicated graphics card. InvokeAI might be reeeeeally slow. :(";
+            }
+            else if (!strGPUName.ToLower().Contains("rtx 50")
+                && !strGPUName.ToLower().Contains("rtx 40")
+                && !strGPUName.ToLower().Contains("rtx 30")
+                && !strGPUName.ToLower().Contains("rtx 20")
+                && !strGPUName.ToLower().Contains("gtx 1"))
+            {
+                iWorks = Math.Min(iWorks, 1);
+                strProblem += "\nGPU is not the newest.";
+            }
+
+            if (strGPUName.ToLower().Contains("1650"))
+            {
+                iWorks = 0;
+                strProblem += "\nYour graphics card (GTX 1650) is not supported. :(";
+            }
+
+            if (iWorks == 2)
+                strOutput += "Should work! <3";
+            else if (iWorks == 1)
+                strOutput += "Might work! <3" + strProblem;
+            else if (iWorks == 0)
+                strOutput += "Won't work, most likely. :(" + strProblem;
+
+            if (iWorks > 0 && fGPUMemory < 5.9f)
+            {
+                strOutput += "\n\nDISABLE NSFW FILTER!\n\nDisable the NSFW filter to the left, so you are not restricted to images below 512x512 pixels.";
+            }
+
+            return strOutput;
+        }
+
+        private void MainButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (!starterSettings.bAcceptedLicense)
+            {
+                starterSettings.bAcceptedLicense = true;
+                LoadStarter();
+            }
+            else
+            {
+                if (backendState == BackendState.Stopped
+                    || backendState == BackendState.Loading)
+                {
+                    StartInvoke();
+                }
+                else if (backendState == BackendState.Running)
+                {
+                    StopInvoke();
+                }
+            }   
+        }
+
+        private void StopInvoke()
+        {
+            if (processInvokeAi != null)
+                processInvokeAi.CloseMainWindow();
+
+            backendState = BackendState.Stopped;
+            buttonStart.Content = "Start InvokeAI";
+        }
+
+        private void OnClose(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            starterSettings.bFirstStart = false;
+
+            if (cancelSource != null)
+                cancelSource.Cancel();
+            SetParameters();
+            SaveSettings();
+
+            if (processInvokeAi != null)
+                processInvokeAi.CloseMainWindow();
+        }
+
+
+        // ================== SAVE/LOAD ===================
 
         private void SaveSettings()
         {
@@ -243,6 +385,42 @@ namespace invokeai_starter
         }
 
 
+        // =================== UI CONTROL ===================
+
+        private void InitUI()
+        {
+            checkNsfw.IsChecked = bNsfwFilter;
+            checkShareAccess.IsChecked = bShareAccess;
+
+            textInternalAddress.Text = strInternalAddress;
+            textInternetAddress.Text = strInternetAddress;
+        }
+
+        private void OnWindowMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void textCloseX(object sender, MouseButtonEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+
+        // =================== HELPERS ===================
+
+        public void GenerateIPLinks()
+        {
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    strInternalAddress = $"http://{ip}:9090";
+            }
+
+            strInternetAddress = $"http://{new WebClient().DownloadString("https://api.ipify.org")}:9090";
+        }
 
         // based on https://stackoverflow.com/questions/4897655/create-a-shortcut-on-desktop
         private void CreateDesktopShortcut()
@@ -257,154 +435,22 @@ namespace invokeai_starter
             shortcut.Save();
         }
 
-        private string strCheckForIssues()
+        public bool PortInUse(int _iPort)
         {
-            string strOutput = "";
-            int iWorks = 2; // yes, maybe, no
-            string strProblem = "";
-
-            string strGPUName = "";
-            float fGPUMemory = 0f;
-            float fRAMInGB = 0f;
-
-            // get gpu info
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_VideoController");
-            foreach (ManagementObject obj in searcher.Get())
-            {
-                strGPUName = obj["Name"].ToString();
-            }
-
-            NvAPIWrapper.GPU.PhysicalGPU[] arGPUs = NvAPIWrapper.GPU.PhysicalGPU.GetPhysicalGPUs();
-            foreach (NvAPIWrapper.GPU.PhysicalGPU gpu in arGPUs)
-            {
-                fGPUMemory = gpu.MemoryInformation.DedicatedVideoMemoryInkB;
-                fGPUMemory = fGPUMemory / 1024f / 1024f;
-            }
-
-            // get ram info
-            searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
-            foreach (ManagementObject obj in searcher.Get())
-            {
-                long memory = Convert.ToInt64(obj["TotalPhysicalMemory"]);
-                fRAMInGB = memory / 1024f / 1024f / 1024f;
-            }
-
-            strOutput = $"Your graphics card: {strGPUName} ({fGPUMemory} GB)\n";
-
-            if (fGPUMemory < 3.9f)
-            {
-                iWorks = 0;
-                strProblem += "\nNot enough GPU memory. Needs at least 4 GB.";
-            }
-
-            if (fRAMInGB < 11f)
-            {
-                iWorks = 1;
-                strProblem += "\nAI images needs at least 12 GB of memory (RAM). It might work, but the first loading time will be reaaaaally long (~10 min).";
-            }
-
-            if (strExeFolderPath.Contains(" "))
-            {
-                iWorks = 0;
-                strProblem += $"\nPath contains space! Please rename all folders, so they don't contain spaces." +
-                    $"\nBAD EXAMPLE:  D:/my folder/invokeai/" +
-                    $"\nGOOD EXAMPLE: D:/myfolder/invokeai/" +
-                    $"\n\nYour path: {strExeFolderPath}";
-            }
-
-            if (strExeFolderPath.Contains("[") || strExeFolderPath.Contains("("))
-            {
-                iWorks = 0;
-                strProblem += $"\nPath contains special characters! Please rename all folders, so they don't contain special characters." +
-                    $"\nProblematic characters: [], (), cyrillic alphabet, other non-latin characters, etc." +
-                    $"\n\nYour path: {strExeFolderPath}";
-            }
-
-            if (strGPUName.ToLower().Contains("amd")
-                || strGPUName.ToLower().Contains("ati")
-                || strGPUName.ToLower().Contains("radeon"))
-            {
-                iWorks = 0;
-                strProblem += "\nAMD graphic cards won't work. :( They will only work on Linux with a proper installation of InvokeAI.";
-            }
-            else if (strGPUName.ToLower().Contains("intel"))
-            {
-                iWorks = 1;
-                strProblem += "\nYour PC appears to not have a dedicated graphics card. InvokeAI might be reeeeeally slow. :(";
-            }
-            else if (!strGPUName.ToLower().Contains("rtx 50")
-                && !strGPUName.ToLower().Contains("rtx 40")
-                && !strGPUName.ToLower().Contains("rtx 30")
-                && !strGPUName.ToLower().Contains("rtx 20")
-                && !strGPUName.ToLower().Contains("gtx 1"))
-            {
-                iWorks = Math.Min(iWorks, 1);
-                strProblem += "\nGPU is not the newest.";
-            }
-
-            if (strGPUName.ToLower().Contains("1650"))
-            {
-                iWorks = 0;
-                strProblem += "\nYour graphics card (GTX 1650) is not supported. :(";
-            }
-
-            if (iWorks == 2)
-                strOutput += "Should work! <3";
-            else if (iWorks == 1)
-                strOutput += "Might work! <3" + strProblem;
-            else if (iWorks == 0)
-                strOutput += "Won't work, most likely. :(" + strProblem;
-
-            return strOutput;
-        }
-
-        public void GenerateIPLinks()
-        {
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                    strInternalAddress = $"http://{ip}:9090";
-            }
-
-            strInternetAddress = $"http://{new WebClient().DownloadString("https://api.ipify.org")}:9090";
-        }
-
-        private void MainButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (!starterSettings.bAcceptedLicense)
-                OnLicenseAccepted();
-            else
-                StartInvokeAI();
-        }
-
-        public bool PortInUse(int port)
-        {
-            bool inUse = false;
+            bool bInUse = false;
 
             System.Net.NetworkInformation.IPGlobalProperties ipProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
             IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
 
-            foreach (IPEndPoint endPoint in ipEndPoints)
+            foreach (IPEndPoint ipEndPoint in ipEndPoints)
             {
-                if (endPoint.Port == port)
+                if (ipEndPoint.Port == _iPort)
                 {
-                    inUse = true;
+                    bInUse = true;
                     break;
                 }
             }
-            return inUse;
-        }
-
-        public async Task CheckForOpenPort(TimeSpan interval, System.Threading.CancellationToken cancellationToken)
-        {
-            while (true)
-            {
-                if (cancellationToken.IsCancellationRequested || PortInUse(9090))
-                    return;
-                else
-                    await Task.Delay(interval, cancellationToken);     
-            }
+            return bInUse;
         }
 
         private void textInternalAddressClick(object sender, MouseButtonEventArgs e)
@@ -427,33 +473,50 @@ namespace invokeai_starter
             Clipboard.SetText(strInternetAddress);
         }
 
-        private void textCloseX(object sender, MouseButtonEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
-        private void OnWindowMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-                this.DragMove();
-        }
-
-        private void OnClose(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (cancelSource != null)
-                cancelSource.Cancel();
-            SetParameters();
-            SaveSettings();
-
-            if (processInvokeAi != null)
-                processInvokeAi.Close();
-        }
-
         private void OnConfigurator(object sender, RoutedEventArgs e)
         {
             string strPath = System.IO.Path.Combine(strExeFolderPath, "env/Scripts/invoke.exe"); //invokeai-configure.exe
             if (System.IO.File.Exists(strPath))
                 Process.Start(System.IO.Path.Combine(strExeFolderPath, "install_models.bat"));
         }
+
+        private void OnEmbeddingsFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start(System.IO.Path.Combine(strExeFolderPath, "invokeai/embeddings"));
+        }
+
+        private void OnOutputFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start(System.IO.Path.Combine(strExeFolderPath, "outputs"));
+        }
+
+        private void OnLogoClick(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start("https://invoke-ai.github.io/InvokeAI/");
+        }
+
+        private void OnStandaloneTextClick(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start("https://sunija.itch.io/invokeai");
+        }
+
+        private void textMinimize(object sender, MouseButtonEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+            if (processInvokeAi != null)
+            {
+                ShowWindow(processInvokeAi.MainWindowHandle, SW_MINIMIZE);
+            }
+        }
+
+
+        // =================== IMPORTED METHODS ===================
+
+        private const int SW_MAXIMIZE = 3;
+        private const int SW_MINIMIZE = 6;
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }
