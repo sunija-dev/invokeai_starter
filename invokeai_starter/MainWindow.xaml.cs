@@ -31,7 +31,7 @@ namespace invokeai_starter
     public partial class MainWindow : Window
     {
         public static MainWindow instance;
-
+        public static HardwareInfo s_hardwareInfo = new HardwareInfo();
 
         private string strExeFolderPath = "";
         private string strSettingsPath = "";
@@ -43,6 +43,7 @@ namespace invokeai_starter
 
         private bool bNsfwFilter = true;
         private bool bShareAccess = false;
+        private string strOutputFolder = "";
 
         private string strInternalAddress = "";
         private string strInternetAddress = "";
@@ -58,28 +59,55 @@ namespace invokeai_starter
             public bool bStartDirectly = true;
         }
 
+        public class HardwareInfo
+        {
+            public string strGPUName = "";
+            public float fGPUMemoryInGB = 0f;
+            public float fRAMInGB = 0f;
+
+            public bool bCouldRetrieveGPUInfo = true;
+            public bool bCouldRetrieveRAMInfo = true;
+        }
+
         private BackendState backendState = BackendState.Stopped;
         private enum BackendState { Stopped, Loading, Running }
+
+        private const bool bIsOnlyRequirementsChecker = false;
 
 
         public MainWindow()
         {
             instance = this;
 
+            s_hardwareInfo = hardwareinfoGet();
+
+            if (bIsOnlyRequirementsChecker)
+            {
+                WindowRequirements windowRequirements = new WindowRequirements();
+                windowRequirements.Show();
+
+                this.Close();
+                return;
+            }
+
             InitializeComponent();
 
             // create paths
             strExeFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            strExeFolderPath = strExeFolderPath.Replace('\\', '/');
 #if DEBUG
-            strExeFolderPath = "E:\\invokeai_2_3_0_standalone"; // use my local path for testing
+            strExeFolderPath = "C:\\Users\\Sunija\\invokeai_standalone_231\\"; // use my local path for testing
 #endif
+            strExeFolderPath = strExeFolderPath.Replace('\\', '/');
             strSettingsPath = System.IO.Path.Combine(strExeFolderPath, c_strSettingsName);
 
             // init/load everything
             LoadSettings();
             GetParameters();
             GenerateIPLinks();
+
+            if (starterSettings.bFirstStart || string.IsNullOrEmpty(strOutputFolder))
+                strOutputFolder = $"{strExeFolderPath}/outputs/";
+            textCurrentOutputPath.Text = $"Current: {strOutputFolder}";
 
             InitUI();
 
@@ -97,9 +125,16 @@ namespace invokeai_starter
             textLicense.Text = "";
 
             buttonStart.Content = "Start InvokeAI";
-            textFeedback.Text = strCheckForIssues();
+            try
+            {
+                textFeedback.Text = strCheckForIssues();
+            }
+            catch (Exception _ex)
+            {
+                textFeedback.Text = $"Couldn't run issue check. Error: {_ex.Message}";
+            }
 
-            if (starterSettings.bStartDirectly)
+            if ((bool)checkStartDirectly.IsChecked)
                 StartInvoke();
         }
 
@@ -150,97 +185,119 @@ namespace invokeai_starter
             }
         }
 
-        private string strCheckForIssues()
+        public static HardwareInfo hardwareinfoGet()
+        {
+            HardwareInfo hardwareInfo = new HardwareInfo();
+
+            try
+            {
+                NvAPIWrapper.GPU.PhysicalGPU[] arGPUs = NvAPIWrapper.GPU.PhysicalGPU.GetPhysicalGPUs();
+                foreach (NvAPIWrapper.GPU.PhysicalGPU gpu in arGPUs)
+                {
+                    hardwareInfo.strGPUName = gpu.FullName;
+                    hardwareInfo.fGPUMemoryInGB = gpu.MemoryInformation.DedicatedVideoMemoryInkB;
+                    hardwareInfo.fGPUMemoryInGB = hardwareInfo.fGPUMemoryInGB / 1024f / 1024f;
+                    if (gpu.FullName.ToLower().Contains("nvidia"))
+                        break; // for now, we stop at the first nvidia gpu. Could be expanded for systems with multiple nvidia gpus
+                }
+            }
+            catch
+            {
+                hardwareInfo.bCouldRetrieveGPUInfo = false;
+            }
+
+            // get ram info
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    long memory = Convert.ToInt64(obj["TotalPhysicalMemory"]);
+                    hardwareInfo.fRAMInGB = memory / 1024f / 1024f / 1024f;
+                }
+            }
+            catch
+            {
+                hardwareInfo.bCouldRetrieveRAMInfo = false;
+            }
+
+            return hardwareInfo;
+        }
+
+        public static string strCheckForIssues()
         {
             string strOutput = "";
             int iWorks = 2; // yes, maybe, no
             string strProblem = "";
 
-            string strGPUName = "";
-            float fGPUMemory = 0f;
-            float fRAMInGB = 0f;
+            HardwareInfo hardwareInfo = s_hardwareInfo;
 
-            // get gpu info
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_VideoController");
-            foreach (ManagementObject obj in searcher.Get())
+
+            if (hardwareInfo.bCouldRetrieveGPUInfo)
             {
-                strGPUName = obj["Name"].ToString();
+                strOutput += $"Your graphics card: {hardwareInfo.strGPUName} ({hardwareInfo.fGPUMemoryInGB} GB)\n";
+
+                if (hardwareInfo.fGPUMemoryInGB < 3.9f)
+                {
+                    iWorks = Math.Min(iWorks, 0);
+                    strProblem += "\nNot enough GPU memory. Needs at least 4 GB.";
+                }
+
+                if (hardwareInfo.strGPUName.ToLower().Contains("amd")
+                || hardwareInfo.strGPUName.ToLower().Contains("ati")
+                || hardwareInfo.strGPUName.ToLower().Contains("radeon"))
+                {
+                    iWorks = Math.Min(iWorks, 0);
+                    strProblem += "\nAMD graphic cards are not supported (yet). :( Images will be generated on the CPU which will be very slow (~1 min for one image).";
+                }
+                else if (hardwareInfo.strGPUName.ToLower().Contains("intel"))
+                {
+                    iWorks = Math.Min(iWorks, 1);
+                    strProblem += "\nYour PC appears to not have a dedicated graphics card. :( Images will be generated on the CPU which will be very slow (~1 min for one image).";
+                }
+                else if (!hardwareInfo.strGPUName.ToLower().Contains("rtx 50")
+                    && !hardwareInfo.strGPUName.ToLower().Contains("rtx 40")
+                    && !hardwareInfo.strGPUName.ToLower().Contains("rtx 30")
+                    && !hardwareInfo.strGPUName.ToLower().Contains("rtx 20")
+                    && !hardwareInfo.strGPUName.ToLower().Contains("gtx 1"))
+                {
+                    iWorks = Math.Min(iWorks, 1);
+                    strProblem += "\nGPU is not the newest.";
+                }
+
+                if (hardwareInfo.strGPUName.ToLower().Contains("1650") && hardwareInfo.fGPUMemoryInGB < 5.9f)
+                {
+                    iWorks = Math.Min(iWorks, 0);
+                    strProblem += "\nYour graphics card (GTX 1650) is not supported. :(";
+                }
+            }
+            else
+            {
+                strOutput += $"No Nvidia graphics card found. :( Images will be generated on the CPU which will be very slow (~1 min for one image).";
+            }
+            
+
+            if (hardwareInfo.fRAMInGB < 11f)
+            {
+                iWorks = Math.Min(iWorks, 1);
+                strProblem += "\nInvokeAI needs at least 12 GB of memory (RAM). It might work, but the first loading time will be reaaaaally long (~10 min).";
             }
 
-            NvAPIWrapper.GPU.PhysicalGPU[] arGPUs = NvAPIWrapper.GPU.PhysicalGPU.GetPhysicalGPUs();
-            foreach (NvAPIWrapper.GPU.PhysicalGPU gpu in arGPUs)
+            if (instance.strExeFolderPath.Contains(" "))
             {
-                fGPUMemory = gpu.MemoryInformation.DedicatedVideoMemoryInkB;
-                fGPUMemory = fGPUMemory / 1024f / 1024f;
-                if (gpu.FullName.ToLower().Contains("nvidia"))
-                    break; // for now, we stop at the first nvidia gpu. Could be expanded for systems with multiple nvidia gpus
-            }
-
-            // get ram info
-            searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
-            foreach (ManagementObject obj in searcher.Get())
-            {
-                long memory = Convert.ToInt64(obj["TotalPhysicalMemory"]);
-                fRAMInGB = memory / 1024f / 1024f / 1024f;
-            }
-
-            strOutput = $"Your graphics card: {strGPUName} ({fGPUMemory} GB)\n";
-
-            if (fGPUMemory < 3.9f)
-            {
-                iWorks = 0;
-                strProblem += "\nNot enough GPU memory. Needs at least 4 GB.";
-            }
-
-            if (fRAMInGB < 11f)
-            {
-                iWorks = 1;
-                strProblem += "\nAI images needs at least 12 GB of memory (RAM). It might work, but the first loading time will be reaaaaally long (~10 min).";
-            }
-
-            if (strExeFolderPath.Contains(" "))
-            {
-                iWorks = 0;
+                iWorks = Math.Min(iWorks, 0);
                 strProblem += $"\nPath contains space! Please rename all folders, so they don't contain spaces." +
                     $"\nBAD EXAMPLE:  D:/my folder/invokeai/" +
                     $"\nGOOD EXAMPLE: D:/myfolder/invokeai/" +
-                    $"\n\nYour path: {strExeFolderPath}";
+                    $"\n\nYour path: {instance.strExeFolderPath}";
             }
 
-            if (strExeFolderPath.Contains("[") || strExeFolderPath.Contains("("))
+            if (instance.strExeFolderPath.Contains("[") || instance.strExeFolderPath.Contains("("))
             {
-                iWorks = 0;
+                iWorks = Math.Min(iWorks, 0);
                 strProblem += $"\nPath contains special characters! Please rename all folders, so they don't contain special characters." +
                     $"\nProblematic characters: [], (), cyrillic alphabet, other non-latin characters, etc." +
-                    $"\n\nYour path: {strExeFolderPath}";
-            }
-
-            if (strGPUName.ToLower().Contains("amd")
-                || strGPUName.ToLower().Contains("ati")
-                || strGPUName.ToLower().Contains("radeon"))
-            {
-                iWorks = 0;
-                strProblem += "\nAMD graphic cards won't work. :( They will only work on Linux with a proper installation of InvokeAI.";
-            }
-            else if (strGPUName.ToLower().Contains("intel"))
-            {
-                iWorks = 1;
-                strProblem += "\nYour PC appears to not have a dedicated graphics card. InvokeAI might be reeeeeally slow. :(";
-            }
-            else if (!strGPUName.ToLower().Contains("rtx 50")
-                && !strGPUName.ToLower().Contains("rtx 40")
-                && !strGPUName.ToLower().Contains("rtx 30")
-                && !strGPUName.ToLower().Contains("rtx 20")
-                && !strGPUName.ToLower().Contains("gtx 1"))
-            {
-                iWorks = Math.Min(iWorks, 1);
-                strProblem += "\nGPU is not the newest.";
-            }
-
-            if (strGPUName.ToLower().Contains("1650"))
-            {
-                iWorks = 0;
-                strProblem += "\nYour graphics card (GTX 1650) is not supported. :(";
+                    $"\n\nYour path: {instance.strExeFolderPath}";
             }
 
             if (iWorks == 2)
@@ -250,7 +307,7 @@ namespace invokeai_starter
             else if (iWorks == 0)
                 strOutput += "Won't work, most likely. :(" + strProblem;
 
-            if (iWorks > 0 && fGPUMemory < 5.9f)
+            if (iWorks > 0 && hardwareInfo.fGPUMemoryInGB < 5.9f)
             {
                 strOutput += "\n\nDISABLE NSFW FILTER!\n\nDisable the NSFW filter to the left, so you are not restricted to images below 512x512 pixels.";
             }
@@ -308,6 +365,7 @@ namespace invokeai_starter
         {
             try
             {
+                starterSettings.bStartDirectly = (bool)checkStartDirectly.IsChecked;
                 string strFileContent = JsonConvert.SerializeObject(starterSettings);
                 System.IO.File.WriteAllText(strSettingsPath, strFileContent);
             }
@@ -328,6 +386,7 @@ namespace invokeai_starter
                 {
                     string strFileContent = System.IO.File.ReadAllText(strSettingsPath);
                     starterSettings = JsonConvert.DeserializeObject<StarterSettings>(strFileContent);
+                    checkStartDirectly.IsChecked = starterSettings.bStartDirectly;
                 }
                 catch (Exception _exception)
                 {
@@ -355,12 +414,15 @@ namespace invokeai_starter
 
                 // set outdir
                 if (strLine.StartsWith("--outdir="))
-                    arInitFileLines[i] = $"--outdir=\"{strExeFolderPath}/outputs/\"";
+                    arInitFileLines[i] = $"--outdir=\"{strOutputFolder}\"";
+
+                if (strLine.StartsWith("--embedding_path="))
+                    arInitFileLines[i] = $"--embedding_path=\"{strExeFolderPath}/invokeai/embeddings\"";
 
                 // set nsfw checker and access share
                 if (strLine.StartsWith("# generation arguments"))
                 {
-                    arInitFileLines[i + 1] = bNsfwFilter ? "" : "--no-nsfw_checker";
+                    arInitFileLines[i + 1] = bNsfwFilter ? "--nsfw_checker" : "";
                     arInitFileLines[i + 2] = bShareAccess ? "--host=0.0.0.0" : "";
                 }
             }
@@ -372,11 +434,21 @@ namespace invokeai_starter
         {
             try
             {
+                // Refactor: If outdir it retrieved via line reading, the other two should also use line reading
                 string strIniFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/invokeai.init");
                 string strFileContent = System.IO.File.ReadAllText(strIniFilePath);
 
-                bNsfwFilter = !strFileContent.Contains("--no-nsfw_checker");
+                bNsfwFilter = strFileContent.Contains("--nsfw_checker");
                 bShareAccess = strFileContent.Contains("--host=0.0.0.0");
+
+                // get outdir
+                string[] arInitFileLines = System.IO.File.ReadAllLines(strIniFilePath);
+                for (int i = 0; i < arInitFileLines.Length; i++)
+                {
+                    string strLine = arInitFileLines[i];
+                    if (strLine.StartsWith("--outdir="))
+                        strOutputFolder = strLine.Replace("--outdir=", "").Replace("\"", "");
+                }
             }
             catch
             {
@@ -480,6 +552,18 @@ namespace invokeai_starter
                 Process.Start(System.IO.Path.Combine(strExeFolderPath, "install_models.bat"));
         }
 
+        private void OnChangeOutputFolder(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                strOutputFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
+            }
+
+            textCurrentOutputPath.Text = $"Current: {strOutputFolder}";
+            SetParameters();
+        }
+
         private void OnEmbeddingsFolder(object sender, RoutedEventArgs e)
         {
             Process.Start(System.IO.Path.Combine(strExeFolderPath, "invokeai/embeddings"));
@@ -487,7 +571,7 @@ namespace invokeai_starter
 
         private void OnOutputFolder(object sender, RoutedEventArgs e)
         {
-            Process.Start(System.IO.Path.Combine(strExeFolderPath, "outputs"));
+            Process.Start(strOutputFolder);
         }
 
         private void OnLogoClick(object sender, MouseButtonEventArgs e)
@@ -518,5 +602,7 @@ namespace invokeai_starter
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+
     }
 }

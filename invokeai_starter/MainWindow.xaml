@@ -12,32 +12,31 @@
         <Border BorderBrush="#FF6A6A6A" BorderThickness="1" HorizontalAlignment="Left" Height="503" Margin="15,16,0,0" VerticalAlignment="Top" Width="365"/>
 
         <TextBlock HorizontalAlignment="Left" Margin="590,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick"><Run Text="unofficial standalone "/><Run Text="by Sunija"/></TextBlock>
-        <Image HorizontalAlignment="Left" Height="41" Margin="605,10,0,0" VerticalAlignment="Top" Width="185" Source="images/invokeai_logo_2_3_0.png" MouseDown="OnLogoClick"/>
+        <Image HorizontalAlignment="Left" Height="41" Margin="605,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
         <CheckBox Name="checkNsfw" Content="NSFW filter active" HorizontalAlignment="Left" Margin="30,63,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
         <Grid Margin="30,86,435,245">
             <CheckBox x:Name="checkShareAccess" Content="Share access" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,58,0,0" TextWrapping="Wrap" Text="To access within your wi-fi, use this link:" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,110,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"><Run Text="To access from the internet, use this link:"/><LineBreak/><Run/></TextBlock>
-            <TextBlock HorizontalAlignment="Left" Margin="10,23,0,0" TextWrapping="Wrap" Text="Use InvokeAI on other devices (e.g. your tablet) and lets friends join via the internet." VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325"/>
-            <TextBlock HorizontalAlignment="Left" Margin="21,163,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="304" Height="84"><Run Text="To access via internet, you have to open port 9090 TCP on your router: Google &quot;[the name of your router or internet provider] open port&quot; &amp; follow the tutorial."/><LineBreak/><Run/><LineBreak/><Run Text="Only share this link with people that you trust!"/><LineBreak/><LineBreak/></TextBlock>
-            <TextBlock x:Name="textInternalAddress" PreviewMouseDown="textInternalAddressClick" HorizontalAlignment="Left" Margin="21,84,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
-            <Button Click="CopyInternalAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="202,82,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
-            <TextBlock x:Name="textInternetAddress" PreviewMouseDown="textInternetAddressClick" HorizontalAlignment="Left" Margin="21,137,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
-            <Button Click="CopyInternetAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="202,135,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
+            <TextBlock HorizontalAlignment="Left" Margin="11,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"><Run Text="Your Wi-F"/><Run Text="i:"/></TextBlock>
+            <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Text="Internet:"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,71,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="304" Height="134"><Run Text="Open those links to use InvokeAI on other devices (e.g. your tablet) and let friends join via the internet."/><LineBreak/><LineBreak/><Run Text="To access via internet, you have to open port 9090 TCP on your router: Google &quot;[the name of your router or internet provider] open port&quot; &amp; follow the tutorial."/><LineBreak/><Run/><LineBreak/><Run Text="Only share this link with people that you trust!"/><LineBreak/><LineBreak/></TextBlock>
+            <TextBlock x:Name="textInternalAddress" PreviewMouseDown="textInternalAddressClick" HorizontalAlignment="Left" Margin="84,21,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
+            <Button Click="CopyInternalAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="265,19,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
+            <TextBlock x:Name="textInternetAddress" PreviewMouseDown="textInternetAddressClick" HorizontalAlignment="Left" Margin="84,45,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
+            <Button Click="CopyInternetAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="265,43,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
         </Grid>
         <Button Click="MainButtonClick" Name="buttonStart" Content="Accept License" HorizontalAlignment="Left" Margin="399,427,0,0" VerticalAlignment="Top" Width="384" Height="92" Background="#FF2E2E2E" Foreground="#FFC9C9C9" FontWeight="Bold" FontSize="36" FontFamily="Segoe UI Light" BorderBrush="#FFFFBF10"/>
         <TextBlock x:Name = "textLicense" HorizontalAlignment="Left" Margin="399,109,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="11" Width="391"><Run Text="Hi! To use InvokeAI, you have to agree to the following license."/><LineBreak/><Run/><LineBreak/><Run FontWeight="Bold" Text="TL;DR: The CreativeML OpenRAIL License"/><LineBreak/><LineBreak/><Run Text="1. You can't use the model to deliberately produce nor share illegal or harmful outputs or content"/><LineBreak/><Run Text="2. CompVis claims no rights on the outputs you generate, you are free to use them and are accountable for their use which must not go against the provisions set in the license"/><LineBreak/><Run Text="3. You may re-distribute the weights and use the model commercially and/or as a service. If you do, please be aware you have to include the same use restrictions as the ones in the license and share a copy of the CreativeML OpenRAIL-M to all your users (please read the license entirely and carefully)"/><LineBreak/><Run/><LineBreak/><Run Text="Please read the full license here: "/><LineBreak/><Run Text="https://huggingface.co/spaces/CompVis/stable-diffusion-license"/></TextBlock>
         <TextBlock Name ="textFeedback"  HorizontalAlignment="Left" Margin="399,143,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Height="200" Width="391"/>
         <Button Click="OnOutputFolder" ClickMode="Press" Content="📁 Open output folder" HorizontalAlignment="Left" Margin="631,399,0,0" VerticalAlignment="Top" Width="152" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
         <CheckBox Name="checkStartDirectly" Content="Start directly" HorizontalAlignment="Left" Margin="399,404,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" IsChecked="True"/>
-        <Grid Margin="30,355,435,211">
+        <Grid Margin="30,301,435,265">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
-            <Button ClickMode="Press" Content="Open embeddings folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2" Click="OnEmbeddingsFolder"/>
             <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install embeddings" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,21,0,0" TextWrapping="Wrap" Text="Download embeddings (e.g. from civitai.com), drop them in this folder, restart." VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"/>
+            <Button ClickMode="Press" Content="Open embeddings folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2" Click="OnEmbeddingsFolder"/>
 
         </Grid>
         <Grid Margin="30,27,577,587">
@@ -45,18 +44,29 @@
             <TextBlock HorizontalAlignment="Left" Margin="57,0,0,0" TextWrapping="Wrap" Text="(require restart)" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
 
         </Grid>
-        <Grid Margin="30,427,435,135">
+        <Grid Margin="30,373,435,189">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
-            <Button Click="OnConfigurator" ClickMode="Press" Content="Start model installer" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
             <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install models" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"><Run Text="Download models and add them inside UI. Or you use the automated installer:"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
+            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"><Run Text="Download models and add them inside the UI. Or you use the automated installer:"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
+            <Button Click="OnConfigurator" ClickMode="Press" Content="Start model installer" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
 
         </Grid>
         <TextBlock PreviewMouseDown="textMinimize" HorizontalAlignment="Left" Margin="762,-5.5,0,0" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" Foreground="Gray" FontSize="24" FontWeight="Bold" Height="25"/>
         <TextBlock PreviewMouseDown="textCloseX" HorizontalAlignment="Left" Margin="778,0,0,0" TextWrapping="Wrap" Text=" X " VerticalAlignment="Top" Foreground="Gray" FontSize="14" FontWeight="Bold"/>
+        <TextBlock HorizontalAlignment="Left" Margin="740,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" Text="2.3.1" FontWeight="Bold" FontFamily="Arial"/>
+        <Grid Margin="30,444,435,118">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="326*"/>
+                <ColumnDefinition Width="9*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"><Run Text="Change output folder"/><LineBreak/><Run/></TextBlock>
+            <TextBlock Name ="textCurrentOutputPath" HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2" Text="Current: C:/output"/>
+            <Button Click="OnChangeOutputFolder" ClickMode="Press" Content="Change output folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
+
+        </Grid>
 
     </Grid>
 </Window>
