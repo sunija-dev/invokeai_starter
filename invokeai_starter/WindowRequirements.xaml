@@ -9,11 +9,12 @@
         Title="WindowRequirementsChecker" Height="237" Width="524" AllowsTransparency="True" WindowStyle="None" Background="#FF1A1A20">
     <Grid HorizontalAlignment="Left" Width="524">
         <TextBlock HorizontalAlignment="Left" Margin="313,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick"><Run Text="unofficial standalone "/><Run Text="by Sunija"/></TextBlock>
-        <Image HorizontalAlignment="Left" Height="41" Margin="328,10,0,0" VerticalAlignment="Top" Width="185" Source="images/invokeai_logo_2_3_0.png" MouseDown="OnLogoClick"/>
         <TextBlock PreviewMouseDown="textMinimize" HorizontalAlignment="Left" Margin="485,-6,0,0" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" Foreground="Gray" FontSize="24" FontWeight="Bold" Height="25"/>
         <TextBlock PreviewMouseDown="textCloseX" HorizontalAlignment="Left" Margin="501,0,0,0" TextWrapping="Wrap" Text=" X " VerticalAlignment="Top" Foreground="Gray" FontSize="14" FontWeight="Bold"/>
         <TextBlock Name ="textFeedback"  HorizontalAlignment="Left" Margin="10,83,0,0" TextWrapping="Wrap" Text="Requirements check" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Height="144" Width="503"/>
         <TextBlock x:Name ="textFeedback_Copy"  HorizontalAlignment="Left" Margin="10,21,0,0" TextWrapping="Wrap" Text="InvokeAI Requirements Checker" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Height="30" Width="250" FontWeight="Bold"/>
         <Button Click="OnGoToDownloadPage" ClickMode="Press" Content="Go to Download Page" HorizontalAlignment="Left" Margin="361,204,0,0" VerticalAlignment="Top" Width="152" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
+        <Image HorizontalAlignment="Left" Height="41" Margin="326,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
+        <TextBlock HorizontalAlignment="Left" Margin="461,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" FontWeight="Bold" FontFamily="Arial"><Run Text="2.3.2"/><LineBreak/><Run/></TextBlock>
     </Grid>
 </Window>

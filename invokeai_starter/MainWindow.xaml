@@ -56,7 +56,7 @@
         </Grid>
         <TextBlock PreviewMouseDown="textMinimize" HorizontalAlignment="Left" Margin="762,-5.5,0,0" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" Foreground="Gray" FontSize="24" FontWeight="Bold" Height="25"/>
         <TextBlock PreviewMouseDown="textCloseX" HorizontalAlignment="Left" Margin="778,0,0,0" TextWrapping="Wrap" Text=" X " VerticalAlignment="Top" Foreground="Gray" FontSize="14" FontWeight="Bold"/>
-        <TextBlock HorizontalAlignment="Left" Margin="740,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" Text="2.3.1" FontWeight="Bold" FontFamily="Arial"/>
+        <TextBlock HorizontalAlignment="Left" Margin="740,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" FontWeight="Bold" FontFamily="Arial"><Run Text="2.3.2"/><LineBreak/><Run/></TextBlock>
         <Grid Margin="30,444,435,118">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>

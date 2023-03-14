@@ -115,6 +115,8 @@ namespace invokeai_starter
             if (starterSettings.bFirstStart)
                 CreateDesktopShortcut();
 
+            UpdateDesktopShortcut();
+
             // check that license is accepted
             if (starterSettings.bAcceptedLicense)
                 LoadStarter();
@@ -300,6 +302,8 @@ namespace invokeai_starter
                     $"\n\nYour path: {instance.strExeFolderPath}";
             }
 
+            strOutput += "\n\n";
+
             if (iWorks == 2)
                 strOutput += "Should work! <3";
             else if (iWorks == 1)
@@ -324,12 +328,12 @@ namespace invokeai_starter
             }
             else
             {
-                if (backendState == BackendState.Stopped
-                    || backendState == BackendState.Loading)
+                if (backendState == BackendState.Stopped)
                 {
                     StartInvoke();
                 }
-                else if (backendState == BackendState.Running)
+                else if (backendState == BackendState.Running
+                        || backendState == BackendState.Loading)
                 {
                     StopInvoke();
                 }
@@ -494,6 +498,18 @@ namespace invokeai_starter
             strInternetAddress = $"http://{new WebClient().DownloadString("https://api.ipify.org")}:9090";
         }
 
+        /// <summary>
+        /// Update the desktop shortcut, if it already exists. Helps e.g. if folder was moved.
+        /// </summary>
+        private void UpdateDesktopShortcut()
+        {
+            object shDesktop = (object)"Desktop";
+            WshShell shell = new WshShell();
+            string strShortcutAddress = (string)shell.SpecialFolders.Item(ref shDesktop) + @"\InvokeAI Starter.lnk";
+            if (System.IO.File.Exists(strShortcutAddress))
+                CreateDesktopShortcut();
+        }
+
         // based on https://stackoverflow.com/questions/4897655/create-a-shortcut-on-desktop
         private void CreateDesktopShortcut()
         {
@@ -502,7 +518,6 @@ namespace invokeai_starter
             string strShortcutAddress = (string)shell.SpecialFolders.Item(ref shDesktop) + @"\InvokeAI Starter.lnk";
             IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(strShortcutAddress);
             shortcut.Description = "Shortcut for InvokeAI Starter.";
-            shortcut.Hotkey = "Ctrl+Shift+N";
             shortcut.TargetPath = System.IO.Path.Combine(strExeFolderPath, c_strExeName);
             shortcut.Save();
         }
