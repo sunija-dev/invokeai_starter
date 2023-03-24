@@ -285,15 +285,6 @@ namespace invokeai_starter
                 strProblem += "\nInvokeAI needs at least 12 GB of memory (RAM). It might work, but the first loading time will be reaaaaally long (~10 min).";
             }
 
-            if (instance.strExeFolderPath.Contains(" "))
-            {
-                iWorks = Math.Min(iWorks, 0);
-                strProblem += $"\nPath contains space! Please rename all folders, so they don't contain spaces." +
-                    $"\nBAD EXAMPLE:  D:/my folder/invokeai/" +
-                    $"\nGOOD EXAMPLE: D:/myfolder/invokeai/" +
-                    $"\n\nYour path: {instance.strExeFolderPath}";
-            }
-
             if (instance.strExeFolderPath.Contains("[") || instance.strExeFolderPath.Contains("("))
             {
                 iWorks = Math.Min(iWorks, 0);
@@ -495,7 +486,14 @@ namespace invokeai_starter
                     strInternalAddress = $"http://{ip}:9090";
             }
 
-            strInternetAddress = $"http://{new WebClient().DownloadString("https://api.ipify.org")}:9090";
+            try
+            {
+                strInternetAddress = $"http://{new WebClient().DownloadString("https://api.ipify.org")}:9090";
+            }
+            catch
+            {
+                strInternalAddress = "Couldn't connect.";
+            }
         }
 
         /// <summary>
@@ -592,6 +590,18 @@ namespace invokeai_starter
         private void OnLogoClick(object sender, MouseButtonEventArgs e)
         {
             Process.Start("https://invoke-ai.github.io/InvokeAI/");
+        }
+
+        private void OnTraining(object sender, RoutedEventArgs e)
+        {
+            // apply settings
+            SetParameters();
+
+            // run bat file that starts invokeai
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = System.IO.Path.Combine(strExeFolderPath, "training.bat");
+            processStartInfo.WorkingDirectory = strExeFolderPath;
+            processInvokeAi = Process.Start(processStartInfo);
         }
 
         private void OnStandaloneTextClick(object sender, MouseButtonEventArgs e)

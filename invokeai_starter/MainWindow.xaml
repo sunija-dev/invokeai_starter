@@ -34,9 +34,10 @@
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install embeddings" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install / train embeddings" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="175"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,21,0,0" TextWrapping="Wrap" Text="Download embeddings (e.g. from civitai.com), drop them in this folder, restart." VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"/>
             <Button ClickMode="Press" Content="Open embeddings folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2" Click="OnEmbeddingsFolder"/>
+            <Button ClickMode="Press" Content="Training" HorizontalAlignment="Left" Margin="113,44,0,0" VerticalAlignment="Top" Width="62" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Click="OnTraining"/>
 
         </Grid>
         <Grid Margin="30,27,577,587">

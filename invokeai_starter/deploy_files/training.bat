@@ -12,7 +12,7 @@ ECHO:
 ECHO:
 ECHO Standalone by Sunija.
 ECHO:
-ECHO Loading...
+ECHO Loading Training Interface...
 
 
 call "%cd%/env/Scripts/activate.bat"
@@ -20,7 +20,7 @@ call "%cd%/env/Scripts/activate.bat"
 set "TRANSFORMERS_CACHE=%cd%/ai_cache/huggingface/transformers"
 set "TORCH_HOME=%cd%/ai_cache/torch"
 
-"%cd%/env/python.exe" "%cd%/env/Scripts/invoke.exe" --web --root "%cd%/invokeai/"
+"%cd%/env/python.exe" "%cd%/env/Scripts/invokeai-ti.exe" --gui --root "%cd%/invokeai/"
 pause
 exit
 
