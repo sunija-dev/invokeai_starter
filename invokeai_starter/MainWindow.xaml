@@ -12,7 +12,7 @@
         <Border BorderBrush="#FF6A6A6A" BorderThickness="1" HorizontalAlignment="Left" Height="503" Margin="15,16,0,0" VerticalAlignment="Top" Width="365"/>
 
         <TextBlock HorizontalAlignment="Left" Margin="590,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick"><Run Text="unofficial standalone "/><Run Text="by Sunija"/></TextBlock>
-        <Image HorizontalAlignment="Left" Height="41" Margin="605,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
+        <Image HorizontalAlignment="Left" Height="41" Margin="571,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
         <CheckBox Name="checkNsfw" Content="NSFW filter active" HorizontalAlignment="Left" Margin="30,63,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
         <Grid Margin="30,86,435,245">
             <CheckBox x:Name="checkShareAccess" Content="Share access" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
@@ -44,6 +44,7 @@
             <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Options" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" FontWeight="Bold"/>
             <TextBlock HorizontalAlignment="Left" Margin="57,0,0,0" TextWrapping="Wrap" Text="(require restart)" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
 
+
         </Grid>
         <Grid Margin="30,373,435,189">
             <Grid.ColumnDefinitions>
@@ -57,7 +58,7 @@
         </Grid>
         <TextBlock PreviewMouseDown="textMinimize" HorizontalAlignment="Left" Margin="762,-5.5,0,0" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" Foreground="Gray" FontSize="24" FontWeight="Bold" Height="25"/>
         <TextBlock PreviewMouseDown="textCloseX" HorizontalAlignment="Left" Margin="778,0,0,0" TextWrapping="Wrap" Text=" X " VerticalAlignment="Top" Foreground="Gray" FontSize="14" FontWeight="Bold"/>
-        <TextBlock HorizontalAlignment="Left" Margin="740,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" FontWeight="Bold" FontFamily="Arial"><Run Text="2.3.2"/><LineBreak/><Run/></TextBlock>
+        <TextBlock x:Name="textVersionNumber" HorizontalAlignment="Left" Margin="706,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" FontWeight="Bold" FontFamily="Arial" Width="94"><Run Text="2.3.2.post1"/><LineBreak/><Run/></TextBlock>
         <Grid Margin="30,444,435,118">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
@@ -68,6 +69,7 @@
             <Button Click="OnChangeOutputFolder" ClickMode="Press" Content="Change output folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
 
         </Grid>
+        <Button x:Name="buttonUpdate" ClickMode="Press" Content="Update to 3.0.0.post3" HorizontalAlignment="Left" Margin="590,75,0,0" VerticalAlignment="Top" Width="193" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" FontWeight="Bold" Click="buttonUpdate_Click"/>
 
     </Grid>
 </Window>

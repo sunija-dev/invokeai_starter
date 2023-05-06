@@ -22,6 +22,7 @@ using System.Net.Sockets;
 using System.Windows;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Net.Http;
 
 namespace invokeai_starter
 {
@@ -104,6 +105,7 @@ namespace invokeai_starter
             LoadSettings();
             GetParameters();
             GenerateIPLinks();
+            textVersionNumber.Text = strGetVersionNumber();
 
             if (starterSettings.bFirstStart || string.IsNullOrEmpty(strOutputFolder))
                 strOutputFolder = $"{strExeFolderPath}/outputs/";
@@ -353,6 +355,52 @@ namespace invokeai_starter
                 processInvokeAi.CloseMainWindow();
         }
 
+        private async void UpdateUpdateButton()
+        {
+            string strVersionLatest = "";
+            string strVersion = strGetVersionNumber();
+
+            buttonUpdate.Visibility = Visibility.Hidden;
+
+            try
+            {
+                strVersionLatest = await strGetLatestVersion();
+            }
+            catch (Exception _ex)
+            {
+                Console.WriteLine($"Failed to get the latest release: {_ex.Message}");
+            }
+
+            if (!string.IsNullOrEmpty(strVersionLatest) && !string.IsNullOrEmpty(strVersion))
+            {
+                if (strVersionLatest != strVersion)
+                {
+                    // todo: show update button
+                    buttonUpdate.Visibility = Visibility.Visible;
+                    buttonUpdate.Content = $"Update to version {strVersionLatest}";
+                }
+            }
+        }
+
+        private async Task<string> strGetLatestVersion()
+        {
+            HttpClient httpClient = new HttpClient();
+            string strUrl = "https://api.github.com/repos/invoke-ai/InvokeAI/releases/latest";
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0");
+            httpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
+            HttpResponseMessage response = await httpClient.GetAsync(strUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string strJson = await response.Content.ReadAsStringAsync();
+                dynamic data = JsonConvert.DeserializeObject(strJson);
+                string strTagName = data.tag_name;
+                return strTagName;
+            }
+
+            return "";
+        }
+
 
         // ================== SAVE/LOAD ===================
 
@@ -476,6 +524,25 @@ namespace invokeai_starter
 
 
         // =================== HELPERS ===================
+
+        private string strGetVersionNumber()
+        {
+            try
+            {
+                string strVersionFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/.version");
+
+                if (!System.IO.File.Exists(strVersionFilePath))
+                    return "";
+
+                string strVersion = System.IO.File.ReadAllText(strVersionFilePath);
+                return strVersion;
+
+            }
+            catch (Exception _ex)
+            {
+                return "";
+            }
+        }
 
         public void GenerateIPLinks()
         {
@@ -618,6 +685,18 @@ namespace invokeai_starter
             }
         }
 
+        private void buttonUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            // apply settings
+            SetParameters();
+
+            // run bat file that starts invokeai
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = System.IO.Path.Combine(strExeFolderPath, "update.bat");
+            processStartInfo.WorkingDirectory = strExeFolderPath;
+            processInvokeAi = Process.Start(processStartInfo);
+        }
+
 
         // =================== IMPORTED METHODS ===================
 
@@ -628,6 +707,6 @@ namespace invokeai_starter
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-
+        
     }
 }
