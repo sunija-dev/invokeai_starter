@@ -11,33 +11,34 @@
     <Grid Margin="0,0,0,-99">
         <Border BorderBrush="#FF6A6A6A" BorderThickness="1" HorizontalAlignment="Left" Height="503" Margin="15,16,0,0" VerticalAlignment="Top" Width="365"/>
 
-        <TextBlock HorizontalAlignment="Left" Margin="590,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick"><Run Text="unofficial standalone "/><Run Text="by Sunija"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="667,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick" Text="official standalone" Width="111"/>
         <Image HorizontalAlignment="Left" Height="41" Margin="571,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
         <CheckBox Name="checkNsfw" Content="NSFW filter active" HorizontalAlignment="Left" Margin="30,63,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
-        <Grid Margin="30,86,435,245">
+        <Grid Margin="30,86,435,453">
             <CheckBox x:Name="checkShareAccess" Content="Share access" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
             <TextBlock HorizontalAlignment="Left" Margin="11,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"><Run Text="Your Wi-F"/><Run Text="i:"/></TextBlock>
-            <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Text="Internet:"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,71,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="304" Height="134"><Run Text="Open those links to use InvokeAI on other devices (e.g. your tablet) and let friends join via the internet."/><LineBreak/><LineBreak/><Run Text="To access via internet, you have to open port 9090 TCP on your router: Google &quot;[the name of your router or internet provider] open port&quot; &amp; follow the tutorial."/><LineBreak/><Run/><LineBreak/><Run Text="Only share this link with people that you trust!"/><LineBreak/><LineBreak/></TextBlock>
+            <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Text="Internet:" Visibility="Hidden"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,47,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="304" Height="38" Text="Open this link to use InvokeAI on other devices (e.g. your tablet) within your wi-fi."/>
             <TextBlock x:Name="textInternalAddress" PreviewMouseDown="textInternalAddressClick" HorizontalAlignment="Left" Margin="84,21,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
             <Button Click="CopyInternalAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="265,19,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
-            <TextBlock x:Name="textInternetAddress" PreviewMouseDown="textInternetAddressClick" HorizontalAlignment="Left" Margin="84,45,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14"/>
-            <Button Click="CopyInternetAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="265,43,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9"/>
+            <TextBlock x:Name="textInternetAddress" PreviewMouseDown="textInternetAddressClick" HorizontalAlignment="Left" Margin="84,45,0,0" TextWrapping="Wrap" Text="http://somelinknumber:9090" VerticalAlignment="Top" Foreground="#FF8488D3" FontSize="14" Visibility="Hidden"/>
+            <Button Click="CopyInternetAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="265,43,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" Visibility="Hidden"/>
         </Grid>
         <Button Click="MainButtonClick" Name="buttonStart" Content="Accept License" HorizontalAlignment="Left" Margin="399,427,0,0" VerticalAlignment="Top" Width="384" Height="92" Background="#FF2E2E2E" Foreground="#FFC9C9C9" FontWeight="Bold" FontSize="36" FontFamily="Segoe UI Light" BorderBrush="#FFFFBF10"/>
         <TextBlock x:Name = "textLicense" HorizontalAlignment="Left" Margin="399,109,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="11" Width="391"><Run Text="Hi! To use InvokeAI, you have to agree to the following license."/><LineBreak/><Run/><LineBreak/><Run FontWeight="Bold" Text="TL;DR: The CreativeML OpenRAIL License"/><LineBreak/><LineBreak/><Run Text="1. You can't use the model to deliberately produce nor share illegal or harmful outputs or content"/><LineBreak/><Run Text="2. CompVis claims no rights on the outputs you generate, you are free to use them and are accountable for their use which must not go against the provisions set in the license"/><LineBreak/><Run Text="3. You may re-distribute the weights and use the model commercially and/or as a service. If you do, please be aware you have to include the same use restrictions as the ones in the license and share a copy of the CreativeML OpenRAIL-M to all your users (please read the license entirely and carefully)"/><LineBreak/><Run/><LineBreak/><Run Text="Please read the full license here: "/><LineBreak/><Run Text="https://huggingface.co/spaces/CompVis/stable-diffusion-license"/></TextBlock>
         <TextBlock Name ="textFeedback"  HorizontalAlignment="Left" Margin="399,143,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Height="200" Width="391"/>
         <Button Click="OnOutputFolder" ClickMode="Press" Content="📁 Open output folder" HorizontalAlignment="Left" Margin="631,399,0,0" VerticalAlignment="Top" Width="152" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
         <CheckBox Name="checkStartDirectly" Content="Start directly" HorizontalAlignment="Left" Margin="399,404,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" IsChecked="True"/>
-        <Grid Margin="30,301,435,265">
+        <Grid Margin="30,180,435,335">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install / train embeddings" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="175"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,0" TextWrapping="Wrap" Text="Download embeddings (e.g. from civitai.com), drop them in this folder, restart." VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"/>
-            <Button ClickMode="Press" Content="Open embeddings folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2" Click="OnEmbeddingsFolder"/>
-            <Button ClickMode="Press" Content="Training" HorizontalAlignment="Left" Margin="113,44,0,0" VerticalAlignment="Top" Width="62" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Click="OnTraining"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install trigger words" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="175"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,0" TextWrapping="Wrap" Text="Download LORAs &amp; textural inversions (e.g. from civitai.com), drop them in this folder, restart." VerticalAlignment="Top" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"/>
+            <Button ClickMode="Press" Content="Open texural inv. folder" HorizontalAlignment="Left" Margin="180,57,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2" Click="OnEmbeddingsFolder"/>
+            <Button ClickMode="Press" Content="Train texural inversion" HorizontalAlignment="Left" Margin="180,85,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Click="OnTraining" Grid.ColumnSpan="2"/>
+            <Button ClickMode="Press" Content="Open LORA folder" HorizontalAlignment="Left" Margin="10,57,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Click="OnLORAFolder"/>
 
         </Grid>
         <Grid Margin="30,27,577,587">
@@ -46,30 +47,34 @@
 
 
         </Grid>
-        <Grid Margin="30,373,435,189">
+        <Grid Margin="30,293,435,269">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
             <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install models" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
-            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"><Run Text="Download models and add them inside the UI. Or you use the automated installer:"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
-            <Button Click="OnConfigurator" ClickMode="Press" Content="Start model installer" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"><Run Text="You can download models (e.g. from civitai.com) and add them inside the UI. Or you use the automated installer:"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
+            <Button Click="OnConfigurator" ClickMode="Press" Content="Start model installer" HorizontalAlignment="Left" Margin="180,54,0,-6" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
 
         </Grid>
         <TextBlock PreviewMouseDown="textMinimize" HorizontalAlignment="Left" Margin="762,-5.5,0,0" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" Foreground="Gray" FontSize="24" FontWeight="Bold" Height="25"/>
         <TextBlock PreviewMouseDown="textCloseX" HorizontalAlignment="Left" Margin="778,0,0,0" TextWrapping="Wrap" Text=" X " VerticalAlignment="Top" Foreground="Gray" FontSize="14" FontWeight="Bold"/>
         <TextBlock x:Name="textVersionNumber" HorizontalAlignment="Left" Margin="706,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" FontWeight="Bold" FontFamily="Arial" Width="94"><Run Text="2.3.2.post1"/><LineBreak/><Run/></TextBlock>
-        <Grid Margin="30,444,435,118">
+        <Grid Margin="30,369,435,114">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"><Run Text="Change output folder"/><LineBreak/><Run/></TextBlock>
-            <TextBlock Name ="textCurrentOutputPath" HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2" Text="Current: C:/output"/>
-            <Button Click="OnChangeOutputFolder" ClickMode="Press" Content="Change output folder" HorizontalAlignment="Left" Margin="180,44,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136" Text="Change folders"/>
+            <TextBlock Name ="textCurrentOutputPath" HorizontalAlignment="Left" Margin="74,30,0,84" TextWrapping="WrapWithOverflow" Foreground="#FF7E7E7E" Width="261" Grid.ColumnSpan="2" Text="Output: C:\Users\Sunija\invokeai_standalone - Copy\invokeai_2_3_0_standalone" FontSize="10"/>
+            <Button Click="OnChangeOutputFolder" ClickMode="Press" Content="Change" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" Width="59" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
+            <TextBlock x:Name ="textCurrentLORAPath" HorizontalAlignment="Left" Margin="74,66,0,47" TextWrapping="WrapWithOverflow" Foreground="#FF7E7E7E" Width="261" Grid.ColumnSpan="2" Text="LORAs: C:\Users\Sunija\invokeai_standalone - Copy\invokeai_2_3_0_standalone" FontSize="10"/>
+            <Button Click="OnChangeLORAFolder" ClickMode="Press" Content="Change" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="59" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
+            <TextBlock x:Name ="textCurrentEmbeddingPath" HorizontalAlignment="Left" Margin="74,105,0,10" TextWrapping="WrapWithOverflow" Foreground="#FF7E7E7E" Width="261" Grid.ColumnSpan="2" Text="Textural Inversions: C:\Users\Sunija\invokeai_standalone - Copy\invokeai_2_3_0_standalone" FontSize="10"/>
+            <Button Click="OnChangeEmbeddingFolder" ClickMode="Press" Content="Change" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="59" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
 
         </Grid>
-        <Button x:Name="buttonUpdate" ClickMode="Press" Content="Update to 3.0.0.post3" HorizontalAlignment="Left" Margin="590,75,0,0" VerticalAlignment="Top" Width="193" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" FontWeight="Bold" Click="buttonUpdate_Click"/>
+        <Button x:Name="buttonUpdate" ClickMode="Press" Content="Update to 3.0.0.post3" HorizontalAlignment="Left" Margin="590,75,0,0" VerticalAlignment="Top" Width="193" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" FontWeight="Bold" Click="buttonUpdate_Click" Visibility="Hidden"/>
 
     </Grid>
 </Window>

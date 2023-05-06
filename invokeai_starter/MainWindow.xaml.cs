@@ -45,6 +45,8 @@ namespace invokeai_starter
         private bool bNsfwFilter = true;
         private bool bShareAccess = false;
         private string strOutputFolder = "";
+        private string strLORAFolder = "";
+        private string strEmbeddingsFolder = "";
 
         private string strInternalAddress = "";
         private string strInternetAddress = "";
@@ -96,7 +98,7 @@ namespace invokeai_starter
             // create paths
             strExeFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 #if DEBUG
-            strExeFolderPath = "C:\\Users\\Sunija\\invokeai_standalone_231\\"; // use my local path for testing
+            strExeFolderPath = "E:\\invokeai standalone_234\\invokeai_2_3_0_standalone"; // use my local path for testing
 #endif
             strExeFolderPath = strExeFolderPath.Replace('\\', '/');
             strSettingsPath = System.IO.Path.Combine(strExeFolderPath, c_strSettingsName);
@@ -108,8 +110,14 @@ namespace invokeai_starter
             textVersionNumber.Text = strGetVersionNumber();
 
             if (starterSettings.bFirstStart || string.IsNullOrEmpty(strOutputFolder))
+            {
                 strOutputFolder = $"{strExeFolderPath}/outputs/";
-            textCurrentOutputPath.Text = $"Current: {strOutputFolder}";
+                strLORAFolder = $"{strExeFolderPath}/invokeai/loras/";
+                strEmbeddingsFolder = $"{strExeFolderPath}/invokeai/embeddings/";
+            }
+            textCurrentOutputPath.Text = $"Output: {strOutputFolder}";
+            textCurrentLORAPath.Text = $"LORAs: {strLORAFolder}";
+            textCurrentEmbeddingPath.Text = $"Textural Inv.: {strEmbeddingsFolder}";
 
             InitUI();
 
@@ -460,7 +468,10 @@ namespace invokeai_starter
                     arInitFileLines[i] = $"--outdir=\"{strOutputFolder}\"";
 
                 if (strLine.StartsWith("--embedding_path="))
-                    arInitFileLines[i] = $"--embedding_path=\"{strExeFolderPath}/invokeai/embeddings\"";
+                    arInitFileLines[i] = $"--embedding_path=\"{strEmbeddingsFolder}\"";
+
+                if (strLine.StartsWith("--lora_directory="))
+                    arInitFileLines[i] = $"--lora_directory=\"{strLORAFolder}\"";
 
                 // set nsfw checker and access share
                 if (strLine.StartsWith("# generation arguments"))
@@ -491,6 +502,10 @@ namespace invokeai_starter
                     string strLine = arInitFileLines[i];
                     if (strLine.StartsWith("--outdir="))
                         strOutputFolder = strLine.Replace("--outdir=", "").Replace("\"", "");
+                    if (strLine.StartsWith("--embedding_path="))
+                        strEmbeddingsFolder = strLine.Replace("--embedding_path=", "").Replace("\"", "");
+                    if (strLine.StartsWith("--lora_directory="))
+                        strLORAFolder = strLine.Replace("--lora_directory=", "").Replace("\"", "");
                 }
             }
             catch
@@ -640,13 +655,42 @@ namespace invokeai_starter
                 strOutputFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
             }
 
-            textCurrentOutputPath.Text = $"Current: {strOutputFolder}";
+            textCurrentOutputPath.Text = $"Output: {strOutputFolder}";
+            SetParameters();
+        }
+
+        private void OnChangeLORAFolder(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                strLORAFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
+            }
+
+            textCurrentLORAPath.Text = $"LORAs: {strLORAFolder}";
+            SetParameters();
+        }
+
+        private void OnChangeEmbeddingFolder(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                strEmbeddingsFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
+            }
+
+            textCurrentEmbeddingPath.Text = $"Textural inv.: {strEmbeddingsFolder}";
             SetParameters();
         }
 
         private void OnEmbeddingsFolder(object sender, RoutedEventArgs e)
         {
-            Process.Start(System.IO.Path.Combine(strExeFolderPath, "invokeai/embeddings"));
+            Process.Start(strEmbeddingsFolder);
+        }
+
+        private void OnLORAFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start(strLORAFolder);
         }
 
         private void OnOutputFolder(object sender, RoutedEventArgs e)
@@ -706,7 +750,5 @@ namespace invokeai_starter
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        
     }
 }
