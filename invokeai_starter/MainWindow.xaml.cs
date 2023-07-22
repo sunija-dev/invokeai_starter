@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using IWshRuntimeLibrary;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Management;
 using System.Diagnostics;
 using System.Net;
@@ -60,6 +61,7 @@ namespace invokeai_starter
             public bool bFirstStart = true;
             public bool bAcceptedLicense = false;
             public bool bStartDirectly = true;
+            public string strVersion = "3.0.0";
         }
 
         public class HardwareInfo
@@ -98,7 +100,7 @@ namespace invokeai_starter
             // create paths
             strExeFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 #if DEBUG
-            strExeFolderPath = "E:\\invokeai standalone_234\\invokeai_2_3_0_standalone"; // use my local path for testing
+            strExeFolderPath = "E:\\invokeai3_standalone_test"; // use my local path for testing
 #endif
             strExeFolderPath = strExeFolderPath.Replace('\\', '/');
             strSettingsPath = System.IO.Path.Combine(strExeFolderPath, c_strSettingsName);
@@ -107,13 +109,13 @@ namespace invokeai_starter
             LoadSettings();
             GetParameters();
             GenerateIPLinks();
-            textVersionNumber.Text = strGetVersionNumber();
+            textVersionNumber.Text = starterSettings.strVersion;
 
             if (starterSettings.bFirstStart || string.IsNullOrEmpty(strOutputFolder))
             {
-                strOutputFolder = $"{strExeFolderPath}/outputs/";
-                strLORAFolder = $"{strExeFolderPath}/invokeai/loras/";
-                strEmbeddingsFolder = $"{strExeFolderPath}/invokeai/embeddings/";
+                strOutputFolder = $"{strExeFolderPath}/invokeai/outputs/";
+                strLORAFolder = $"{strExeFolderPath}/invokeai/autoimport/lora/";
+                strEmbeddingsFolder = $"{strExeFolderPath}/invokeai/autoimport/embedding/";
             }
             textCurrentOutputPath.Text = $"Output: {strOutputFolder}";
             textCurrentLORAPath.Text = $"LORAs: {strLORAFolder}";
@@ -181,6 +183,8 @@ namespace invokeai_starter
             {
                 buttonStart.Content = "Stop";
             });
+
+            UpdateVersionNumber();
 
             // open browser window
             Process.Start("http://localhost:9090");
@@ -366,7 +370,7 @@ namespace invokeai_starter
         private async void UpdateUpdateButton()
         {
             string strVersionLatest = "";
-            string strVersion = strGetVersionNumber();
+            string strVersion = starterSettings.strVersion;
 
             buttonUpdate.Visibility = Visibility.Hidden;
 
@@ -449,7 +453,7 @@ namespace invokeai_starter
 
         private void SetParameters()
         {
-            string strIniFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/invokeai.init");
+            string strIniFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/invokeai.yaml");
 
             if (!System.IO.File.Exists(strIniFilePath))
                 return;
@@ -462,23 +466,19 @@ namespace invokeai_starter
             for (int i = 0; i < arInitFileLines.Length; i++)
             {
                 string strLine = arInitFileLines[i];
+                strLine = strLine.Replace(" ", "");
 
                 // set outdir
-                if (strLine.StartsWith("--outdir="))
-                    arInitFileLines[i] = $"--outdir=\"{strOutputFolder}\"";
-
-                if (strLine.StartsWith("--embedding_path="))
-                    arInitFileLines[i] = $"--embedding_path=\"{strEmbeddingsFolder}\"";
-
-                if (strLine.StartsWith("--lora_directory="))
-                    arInitFileLines[i] = $"--lora_directory=\"{strLORAFolder}\"";
-
-                // set nsfw checker and access share
-                if (strLine.StartsWith("# generation arguments"))
-                {
-                    arInitFileLines[i + 1] = bNsfwFilter ? "--nsfw_checker" : "";
-                    arInitFileLines[i + 2] = bShareAccess ? "--host=0.0.0.0" : "";
-                }
+                if (strLine.StartsWith("outdir:"))
+                    arInitFileLines[i] = $"    outdir: \"{strOutputFolder}\"";
+                else if (strLine.StartsWith("embedding_dir:"))
+                    arInitFileLines[i] = $"    embedding_dir: \"{strEmbeddingsFolder}\"";
+                else if(strLine.StartsWith("lora_dir:"))
+                    arInitFileLines[i] = $"    lora_dir: \"{strLORAFolder}\"";
+                else if(strLine.StartsWith("nsfw_checker:"))
+                    arInitFileLines[i] = $"    nsfw_checker: {bNsfwFilter.ToString().ToLower()}";
+                else if(strLine.StartsWith("host:"))
+                    arInitFileLines[i] = $"    host: {(bShareAccess ? "0.0.0.0" : "127.0.0.1")}";
             }
 
             System.IO.File.WriteAllLines(strIniFilePath, arInitFileLines);
@@ -489,28 +489,34 @@ namespace invokeai_starter
             try
             {
                 // Refactor: If outdir it retrieved via line reading, the other two should also use line reading
-                string strIniFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/invokeai.init");
+                string strIniFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/invokeai.yaml");
                 string strFileContent = System.IO.File.ReadAllText(strIniFilePath);
-
-                bNsfwFilter = strFileContent.Contains("--nsfw_checker");
-                bShareAccess = strFileContent.Contains("--host=0.0.0.0");
 
                 // get outdir
                 string[] arInitFileLines = System.IO.File.ReadAllLines(strIniFilePath);
                 for (int i = 0; i < arInitFileLines.Length; i++)
                 {
                     string strLine = arInitFileLines[i];
-                    if (strLine.StartsWith("--outdir="))
-                        strOutputFolder = strLine.Replace("--outdir=", "").Replace("\"", "");
-                    if (strLine.StartsWith("--embedding_path="))
-                        strEmbeddingsFolder = strLine.Replace("--embedding_path=", "").Replace("\"", "");
-                    if (strLine.StartsWith("--lora_directory="))
-                        strLORAFolder = strLine.Replace("--lora_directory=", "").Replace("\"", "");
+                    strLine = strLine.Replace(" ", "").Replace("\n", "").Replace("\r", "");
+
+                    if (strLine.StartsWith("outdir:"))
+                        strOutputFolder = strLine.Replace("outdir:", "").Replace("\"", "");
+                    else if(strLine.StartsWith("embedding_dir:"))
+                        strEmbeddingsFolder = strLine.Replace("embedding_dir:", "").Replace("\"", "");
+                    else if(strLine.StartsWith("lora_dir:"))
+                        strLORAFolder = strLine.Replace("lora_dir:", "").Replace("\"", "");
+                    else if(strLine.StartsWith("nsfw_checker:"))
+                    {
+                        if (bool.TryParse(arInitFileLines[i].Split(':')[1], out bool o_bNsfwChecker))
+                            bNsfwFilter = o_bNsfwChecker;
+                    }
+                    else if(strLine.StartsWith("bShareAccess:"))
+                        bShareAccess = arInitFileLines[i].Split(':')[1] == "0.0.0.0";
                 }
             }
             catch
             {
-                Console.WriteLine("Could not find invokeai.init");
+                Console.WriteLine("Could not find invokeai.yaml");
             }
         }
 
@@ -540,22 +546,18 @@ namespace invokeai_starter
 
         // =================== HELPERS ===================
 
-        private string strGetVersionNumber()
+        private void UpdateVersionNumber()
         {
             try
             {
-                string strVersionFilePath = System.IO.Path.Combine(strExeFolderPath, "invokeai/.version");
-
-                if (!System.IO.File.Exists(strVersionFilePath))
-                    return "";
-
-                string strVersion = System.IO.File.ReadAllText(strVersionFilePath);
-                return strVersion;
-
+                string strVersionJson = new WebClient().DownloadString("http://localhost:9090/api/v1/app/version");
+                JObject jobjVersion = JObject.Parse(strVersionJson);
+                string strVersion = (string)jobjVersion["version"];
+                starterSettings.strVersion = strVersion;
             }
             catch (Exception _ex)
             {
-                return "";
+                Console.WriteLine($"Could not get version. {_ex}");
             }
         }
 
@@ -642,9 +644,9 @@ namespace invokeai_starter
 
         private void OnConfigurator(object sender, RoutedEventArgs e)
         {
-            string strPath = System.IO.Path.Combine(strExeFolderPath, "env/Scripts/invoke.exe"); //invokeai-configure.exe
-            if (System.IO.File.Exists(strPath))
-                Process.Start(System.IO.Path.Combine(strExeFolderPath, "install_models.bat"));
+            //string strPath = System.IO.Path.Combine(strExeFolderPath, "env/Scripts/invoke.exe"); //invokeai-configure.exe
+            //if (System.IO.File.Exists(strPath))
+            Process.Start(System.IO.Path.Combine(strExeFolderPath, "install_models.bat"));
         }
 
         private void OnChangeOutputFolder(object sender, RoutedEventArgs e)
