@@ -11,7 +11,7 @@
     <Grid Margin="0,0,0,-99">
         <Border BorderBrush="#FF6A6A6A" BorderThickness="1" HorizontalAlignment="Left" Height="503" Margin="15,16,0,0" VerticalAlignment="Top" Width="365"/>
 
-        <TextBlock HorizontalAlignment="Left" Margin="667,51,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick" Text="official standalone" Width="111"/>
+        <TextBlock HorizontalAlignment="Left" Margin="626,48,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick" Text="official standalone" Width="112"/>
         <Image HorizontalAlignment="Left" Height="41" Margin="571,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
         <CheckBox Name="checkNsfw" Content="NSFW filter active" HorizontalAlignment="Left" Margin="30,63,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
         <Grid Margin="30,86,435,453">

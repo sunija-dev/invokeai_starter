@@ -570,6 +570,8 @@ namespace invokeai_starter
                     strInternalAddress = $"http://{ip}:9090";
             }
 
+            // internet address is not displayed anymore
+            /*
             try
             {
                 strInternetAddress = $"http://{new WebClient().DownloadString("https://api.ipify.org")}:9090";
@@ -578,6 +580,7 @@ namespace invokeai_starter
             {
                 strInternalAddress = "Couldn't connect.";
             }
+            */
         }
 
         /// <summary>
@@ -687,17 +690,32 @@ namespace invokeai_starter
 
         private void OnEmbeddingsFolder(object sender, RoutedEventArgs e)
         {
-            Process.Start(strEmbeddingsFolder);
+            try
+            {
+                Process.Start(strEmbeddingsFolder);
+            }
+            catch
+            { }
         }
 
         private void OnLORAFolder(object sender, RoutedEventArgs e)
         {
-            Process.Start(strLORAFolder);
+            try
+            {
+                Process.Start(strLORAFolder);
+            }
+            catch
+            { }
         }
 
         private void OnOutputFolder(object sender, RoutedEventArgs e)
         {
-            Process.Start(strOutputFolder);
+            try
+            {
+                Process.Start(strOutputFolder);
+            }
+            catch
+            { }
         }
 
         private void OnLogoClick(object sender, MouseButtonEventArgs e)
