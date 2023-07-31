@@ -1,6 +1,8 @@
 # invokeai_starter
 A standalone starter for InvokeAI.
 
+![invokeai_standalone_starter](https://github.com/GothaB/invokeai_starter/assets/10253311/c2d141be-7adc-471d-9738-deba2b611761)
+
 # How to build it yourself
 TL;DR: We install invokeai in a conda-environment and make it standalone by using conda-pack. Then we add some bat-scripts and a simple UI (written in WPF C#) so it's easy to use.
 
@@ -17,6 +19,7 @@ call "%cd%/env/Scripts/activate.bat"
 pause
 exit
 ```
+
 
 ## Make invokeai standalone
 
