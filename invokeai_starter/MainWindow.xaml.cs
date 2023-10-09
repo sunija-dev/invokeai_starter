@@ -5,25 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using IWshRuntimeLibrary;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Management;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Windows;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Net.Http;
+using IWshRuntimeLibrary;
 
 namespace invokeai_starter
 {
@@ -43,7 +35,6 @@ namespace invokeai_starter
         private const string c_strExeName = "invokeai_starter.exe";
         private const string c_strSettingsName = "starter_settings.json";
 
-        private bool bNsfwFilter = true;
         private bool bShareAccess = false;
         private string strOutputFolder = "";
         private string strLORAFolder = "";
@@ -61,7 +52,6 @@ namespace invokeai_starter
             public bool bFirstStart = true;
             public bool bAcceptedLicense = false;
             public bool bStartDirectly = true;
-            public string strVersion = "3.0.0";
         }
 
         public class HardwareInfo
@@ -109,7 +99,7 @@ namespace invokeai_starter
             LoadSettings();
             GetParameters();
             GenerateIPLinks();
-            textVersionNumber.Text = starterSettings.strVersion;
+            textVersionNumber.Text = strGetVersionNumber();
 
             if (starterSettings.bFirstStart || string.IsNullOrEmpty(strOutputFolder))
             {
@@ -117,9 +107,9 @@ namespace invokeai_starter
                 strLORAFolder = $"{strExeFolderPath}/invokeai/autoimport/lora/";
                 strEmbeddingsFolder = $"{strExeFolderPath}/invokeai/autoimport/embedding/";
             }
-            textCurrentOutputPath.Text = $"Output: {strOutputFolder}";
-            textCurrentLORAPath.Text = $"LORAs: {strLORAFolder}";
-            textCurrentEmbeddingPath.Text = $"Textural Inv.: {strEmbeddingsFolder}";
+            ChangeTooltipOfButton(buttonChangeOutputFolder, strOutputFolder);
+            ChangeTooltipOfButton(buttonChangeLoraFolder, strLORAFolder);
+            ChangeTooltipOfButton(buttonChangeEmbeddingFolder, strEmbeddingsFolder);
 
             InitUI();
 
@@ -132,6 +122,8 @@ namespace invokeai_starter
             // check that license is accepted
             if (starterSettings.bAcceptedLicense)
                 LoadStarter();
+
+            UpdateUpdateButton();
         }
 
         private void LoadStarter()
@@ -183,8 +175,6 @@ namespace invokeai_starter
             {
                 buttonStart.Content = "Stop";
             });
-
-            UpdateVersionNumber();
 
             // open browser window
             Process.Start("http://localhost:9090");
@@ -318,7 +308,7 @@ namespace invokeai_starter
 
             if (iWorks > 0 && hardwareInfo.fGPUMemoryInGB < 5.9f)
             {
-                strOutput += "\n\nDISABLE NSFW FILTER!\n\nDisable the NSFW filter to the left, so you are not restricted to images below 512x512 pixels.";
+                strOutput += "\n\nDISABLE NSFW FILTER!\n\nDisable the NSFW filter in the UI settings, so you are not restricted to images below 512x512 pixels.";
             }
 
             return strOutput;
@@ -370,7 +360,7 @@ namespace invokeai_starter
         private async void UpdateUpdateButton()
         {
             string strVersionLatest = "";
-            string strVersion = starterSettings.strVersion;
+            string strVersion = strGetVersionNumber();
 
             buttonUpdate.Visibility = Visibility.Hidden;
 
@@ -385,7 +375,7 @@ namespace invokeai_starter
 
             if (!string.IsNullOrEmpty(strVersionLatest) && !string.IsNullOrEmpty(strVersion))
             {
-                if (strVersionLatest != strVersion)
+                if (strVersionLatest != $"v{strVersion}")
                 {
                     // todo: show update button
                     buttonUpdate.Visibility = Visibility.Visible;
@@ -460,7 +450,6 @@ namespace invokeai_starter
 
             string[] arInitFileLines = System.IO.File.ReadAllLines(strIniFilePath);
 
-            bNsfwFilter = (bool)checkNsfw.IsChecked;
             bShareAccess = (bool)checkShareAccess.IsChecked;
 
             for (int i = 0; i < arInitFileLines.Length; i++)
@@ -475,8 +464,6 @@ namespace invokeai_starter
                     arInitFileLines[i] = $"    embedding_dir: \"{strEmbeddingsFolder}\"";
                 else if(strLine.StartsWith("lora_dir:"))
                     arInitFileLines[i] = $"    lora_dir: \"{strLORAFolder}\"";
-                else if(strLine.StartsWith("nsfw_checker:"))
-                    arInitFileLines[i] = $"    nsfw_checker: {bNsfwFilter.ToString().ToLower()}";
                 else if(strLine.StartsWith("host:"))
                     arInitFileLines[i] = $"    host: {(bShareAccess ? "0.0.0.0" : "127.0.0.1")}";
             }
@@ -505,13 +492,8 @@ namespace invokeai_starter
                         strEmbeddingsFolder = strLine.Replace("embedding_dir:", "").Replace("\"", "");
                     else if(strLine.StartsWith("lora_dir:"))
                         strLORAFolder = strLine.Replace("lora_dir:", "").Replace("\"", "");
-                    else if(strLine.StartsWith("nsfw_checker:"))
-                    {
-                        if (bool.TryParse(arInitFileLines[i].Split(':')[1], out bool o_bNsfwChecker))
-                            bNsfwFilter = o_bNsfwChecker;
-                    }
-                    else if(strLine.StartsWith("bShareAccess:"))
-                        bShareAccess = arInitFileLines[i].Split(':')[1] == "0.0.0.0";
+                    else if(strLine.StartsWith("host:"))
+                        bShareAccess = strLine.Split(':')[1] == "0.0.0.0";
                 }
             }
             catch
@@ -525,7 +507,6 @@ namespace invokeai_starter
 
         private void InitUI()
         {
-            checkNsfw.IsChecked = bNsfwFilter;
             checkShareAccess.IsChecked = bShareAccess;
 
             textInternalAddress.Text = strInternalAddress;
@@ -546,8 +527,26 @@ namespace invokeai_starter
 
         // =================== HELPERS ===================
 
-        private void UpdateVersionNumber()
+        private string strGetVersionNumber()
         {
+            string strVersion = "";
+
+            string strPathToVersion = $"{strExeFolderPath}/env/Lib/site-packages/invokeai/version/invokeai_version.py";
+            if (!System.IO.File.Exists(strPathToVersion))
+                return "";
+
+            string strFileContent = System.IO.File.ReadAllText(strPathToVersion);
+            if (string.IsNullOrEmpty(strFileContent))
+                return "";
+
+            int iStartIndex = strFileContent.IndexOf("\"") + 1;
+            int iEndIndex = strFileContent.IndexOf("\"", iStartIndex);
+            if (iStartIndex >= 0 && iEndIndex >= 0)
+                strVersion = strFileContent.Substring(iStartIndex, iEndIndex - iStartIndex);
+
+            return strVersion;
+
+            /*
             try
             {
                 string strVersionJson = new WebClient().DownloadString("http://localhost:9090/api/v1/app/version");
@@ -559,6 +558,7 @@ namespace invokeai_starter
             {
                 Console.WriteLine($"Could not get version. {_ex}");
             }
+            */
         }
 
         public void GenerateIPLinks()
@@ -660,7 +660,7 @@ namespace invokeai_starter
                 strOutputFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
             }
 
-            textCurrentOutputPath.Text = $"Output: {strOutputFolder}";
+            ChangeTooltipOfButton(buttonChangeOutputFolder, strOutputFolder);
             SetParameters();
         }
 
@@ -672,7 +672,7 @@ namespace invokeai_starter
                 strLORAFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
             }
 
-            textCurrentLORAPath.Text = $"LORAs: {strLORAFolder}";
+            ChangeTooltipOfButton(buttonChangeLoraFolder, strLORAFolder);
             SetParameters();
         }
 
@@ -684,7 +684,7 @@ namespace invokeai_starter
                 strEmbeddingsFolder = folderBrowserDialog.SelectedPath.Replace('\\', '/');
             }
 
-            textCurrentEmbeddingPath.Text = $"Textural inv.: {strEmbeddingsFolder}";
+            ChangeTooltipOfButton(buttonChangeEmbeddingFolder, strEmbeddingsFolder);
             SetParameters();
         }
 
@@ -735,6 +735,18 @@ namespace invokeai_starter
             processInvokeAi = Process.Start(processStartInfo);
         }
 
+        private void OnImportOutputFolder(object sender, RoutedEventArgs e)
+        {
+            // apply settings
+            SetParameters();
+
+            // run bat file that starts invokeai
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = System.IO.Path.Combine(strExeFolderPath, "training.bat");
+            processStartInfo.WorkingDirectory = strExeFolderPath;
+            processInvokeAi = Process.Start(processStartInfo);
+        }
+
         private void OnStandaloneTextClick(object sender, MouseButtonEventArgs e)
         {
             Process.Start("https://sunija.itch.io/invokeai");
@@ -761,6 +773,18 @@ namespace invokeai_starter
             processInvokeAi = Process.Start(processStartInfo);
         }
 
+        private void ChangeTooltipOfButton(Button _button, string _strText)
+        {
+            ToolTip tooltip = _button.ToolTip as ToolTip;
+
+            if (tooltip != null)
+            {
+                TextBlock textBlock = tooltip.Content as TextBlock;
+                if (textBlock != null)
+                    textBlock.Text = _strText;
+            }
+        }
+
 
         // =================== IMPORTED METHODS ===================
 
@@ -770,5 +794,7 @@ namespace invokeai_starter
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+
     }
 }

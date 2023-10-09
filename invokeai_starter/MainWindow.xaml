@@ -13,8 +13,7 @@
 
         <TextBlock HorizontalAlignment="Left" Margin="626,48,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FF7E7E7E" FontSize="14" FontStyle="Italic" MouseDown="OnStandaloneTextClick" Text="official standalone" Width="112"/>
         <Image HorizontalAlignment="Left" Height="41" Margin="571,10,0,0" VerticalAlignment="Top" Width="135" Source="invokeai_logo_text.png" MouseDown="OnLogoClick"/>
-        <CheckBox Name="checkNsfw" Content="NSFW filter active" HorizontalAlignment="Left" Margin="30,63,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
-        <Grid Margin="30,86,435,453">
+        <Grid Margin="30,61,435,478">
             <CheckBox x:Name="checkShareAccess" Content="Share access" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"/>
             <TextBlock HorizontalAlignment="Left" Margin="11,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14"><Run Text="Your Wi-F"/><Run Text="i:"/></TextBlock>
             <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Text="Internet:" Visibility="Hidden"/>
@@ -25,11 +24,11 @@
             <Button Click="CopyInternetAddress" ClickMode="Press" Content="Copy" HorizontalAlignment="Left" Margin="265,43,0,0" VerticalAlignment="Top" Width="40" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" Visibility="Hidden"/>
         </Grid>
         <Button Click="MainButtonClick" Name="buttonStart" Content="Accept License" HorizontalAlignment="Left" Margin="399,427,0,0" VerticalAlignment="Top" Width="384" Height="92" Background="#FF2E2E2E" Foreground="#FFC9C9C9" FontWeight="Bold" FontSize="36" FontFamily="Segoe UI Light" BorderBrush="#FFFFBF10"/>
-        <TextBlock x:Name = "textLicense" HorizontalAlignment="Left" Margin="399,109,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="11" Width="391"><Run Text="Hi! To use InvokeAI, you have to agree to the following license."/><LineBreak/><Run/><LineBreak/><Run FontWeight="Bold" Text="TL;DR: The CreativeML OpenRAIL License"/><LineBreak/><LineBreak/><Run Text="1. You can't use the model to deliberately produce nor share illegal or harmful outputs or content"/><LineBreak/><Run Text="2. CompVis claims no rights on the outputs you generate, you are free to use them and are accountable for their use which must not go against the provisions set in the license"/><LineBreak/><Run Text="3. You may re-distribute the weights and use the model commercially and/or as a service. If you do, please be aware you have to include the same use restrictions as the ones in the license and share a copy of the CreativeML OpenRAIL-M to all your users (please read the license entirely and carefully)"/><LineBreak/><Run/><LineBreak/><Run Text="Please read the full license here: "/><LineBreak/><Run Text="https://huggingface.co/spaces/CompVis/stable-diffusion-license"/></TextBlock>
+        <TextBlock x:Name = "textLicense" HorizontalAlignment="Left" Margin="399,109,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="11" Width="391"><Run Text="Hi! To use InvokeAI, you have to agree to the following licenses."/><LineBreak/><Run/><LineBreak/><Run Text="TL;DR: The CreativeML OpenRAIL License // CreativeML Open RAIL++-M"/><LineBreak/><LineBreak/><Run Text="1. You can't use the model to deliberately produce nor share illegal or harmful outputs or content"/><LineBreak/><Run Text="2. CompVis claims no rights on the outputs you generate, you are free to use them and are accountable for their use which must not go against the provisions set in the license"/><LineBreak/><Run Text="3. You may re-distribute the weights and use the model commercially and/or as a service. If you do, please be aware you have to include the same use restrictions as the ones in the license and share a copy of the CreativeML OpenRAIL-M to all your users (please read the license entirely and carefully)"/><LineBreak/><Run/><LineBreak/><Run Text="Please read the full license here: "/><LineBreak/><Run Text="https://huggingface.co/spaces/CompVis/stable-diffusion-license"/></TextBlock>
         <TextBlock Name ="textFeedback"  HorizontalAlignment="Left" Margin="399,143,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Height="200" Width="391"/>
         <Button Click="OnOutputFolder" ClickMode="Press" Content="📁 Open output folder" HorizontalAlignment="Left" Margin="631,399,0,0" VerticalAlignment="Top" Width="152" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
         <CheckBox Name="checkStartDirectly" Content="Start directly" HorizontalAlignment="Left" Margin="399,404,0,0" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" IsChecked="True"/>
-        <Grid Margin="30,180,435,335">
+        <Grid Margin="30,150,435,365">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
@@ -47,34 +46,59 @@
 
 
         </Grid>
-        <Grid Margin="30,293,435,269">
+        <Grid Margin="30,261,435,282">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
             <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Install models" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"><Run Text="You can download models (e.g. from civitai.com) and add them inside the UI. Or you use the automated installer:"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
-            <Button Click="OnConfigurator" ClickMode="Press" Content="Start model installer" HorizontalAlignment="Left" Margin="180,54,0,-6" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
+            <Button Click="OnConfigurator" ClickMode="Press" Content="Start model installer" HorizontalAlignment="Left" Margin="180,62,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
 
         </Grid>
         <TextBlock PreviewMouseDown="textMinimize" HorizontalAlignment="Left" Margin="762,-5.5,0,0" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" Foreground="Gray" FontSize="24" FontWeight="Bold" Height="25"/>
         <TextBlock PreviewMouseDown="textCloseX" HorizontalAlignment="Left" Margin="778,0,0,0" TextWrapping="Wrap" Text=" X " VerticalAlignment="Top" Foreground="Gray" FontSize="14" FontWeight="Bold"/>
         <TextBlock x:Name="textVersionNumber" HorizontalAlignment="Left" Margin="706,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#a0a2bc" FontSize="14" MouseDown="OnLogoClick" FontWeight="Bold" FontFamily="Arial" Width="94"><Run Text="2.3.2.post1"/><LineBreak/><Run/></TextBlock>
-        <Grid Margin="30,369,435,114">
+        <Button x:Name="buttonUpdate" ClickMode="Press" Content="Update to 3.0.0.post3" HorizontalAlignment="Left" Margin="590,75,0,0" VerticalAlignment="Top" Width="193" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" FontWeight="Bold" Click="buttonUpdate_Click" Visibility="Hidden"/>
+        <Grid Margin="30,427,435,116">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="326*"/>
                 <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
             <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136" Text="Change folders"/>
-            <TextBlock Name ="textCurrentOutputPath" HorizontalAlignment="Left" Margin="74,30,0,84" TextWrapping="WrapWithOverflow" Foreground="#FF7E7E7E" Width="261" Grid.ColumnSpan="2" Text="Output: C:\Users\Sunija\invokeai_standalone - Copy\invokeai_2_3_0_standalone" FontSize="10"/>
-            <Button Click="OnChangeOutputFolder" ClickMode="Press" Content="Change" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" Width="59" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
-            <TextBlock x:Name ="textCurrentLORAPath" HorizontalAlignment="Left" Margin="74,66,0,47" TextWrapping="WrapWithOverflow" Foreground="#FF7E7E7E" Width="261" Grid.ColumnSpan="2" Text="LORAs: C:\Users\Sunija\invokeai_standalone - Copy\invokeai_2_3_0_standalone" FontSize="10"/>
-            <Button Click="OnChangeLORAFolder" ClickMode="Press" Content="Change" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="59" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
-            <TextBlock x:Name ="textCurrentEmbeddingPath" HorizontalAlignment="Left" Margin="74,105,0,10" TextWrapping="WrapWithOverflow" Foreground="#FF7E7E7E" Width="261" Grid.ColumnSpan="2" Text="Textural Inversions: C:\Users\Sunija\invokeai_standalone - Copy\invokeai_2_3_0_standalone" FontSize="10"/>
-            <Button Click="OnChangeEmbeddingFolder" ClickMode="Press" Content="Change" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="59" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609"/>
+            <Button Name ="buttonChangeOutputFolder" Click="OnChangeOutputFolder" ClickMode="Press" Content="Change Output folder" HorizontalAlignment="Left" Margin="10,57,0,0" VerticalAlignment="Top" Width="153" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609">
+                <Button.ToolTip>
+                    <ToolTip>
+                        <TextBlock>[]</TextBlock>
+                    </ToolTip>
+                </Button.ToolTip>
+            </Button>
+            <Button Name ="buttonChangeLoraFolder" Click="OnChangeLORAFolder" ClickMode="Press" Content="Change Lora folder" HorizontalAlignment="Left" Margin="173,28,0,0" VerticalAlignment="Top" Width="153" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609">
+                <Button.ToolTip>
+                    <ToolTip>
+                        <TextBlock>[]</TextBlock>
+                    </ToolTip>
+                </Button.ToolTip>
+            </Button>
+            <Button Name="buttonChangeEmbeddingFolder" Click="OnChangeEmbeddingFolder" ClickMode="Press" Content="Change Textural Inv. folder" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" Width="153" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609">
+                <Button.ToolTip>
+                    <ToolTip>
+                        <TextBlock>[]</TextBlock>
+                    </ToolTip>
+                </Button.ToolTip>
+            </Button>
 
         </Grid>
-        <Button x:Name="buttonUpdate" ClickMode="Press" Content="Update to 3.0.0.post3" HorizontalAlignment="Left" Margin="590,75,0,0" VerticalAlignment="Top" Width="193" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" FontWeight="Bold" Click="buttonUpdate_Click" Visibility="Hidden"/>
+        <Grid Margin="30,351,435,211" Visibility="Hidden">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="326*"/>
+                <ColumnDefinition Width="9*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFC9C9C9" FontSize="14" Width="136"><Run Text="Import outputs"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
+            <Button Click="OnImportOutputFolder" ClickMode="Press" Content="Import Old Output Folder" HorizontalAlignment="Left" Margin="180,48,0,0" VerticalAlignment="Top" Width="155" Height="23" Background="#FF2E2E2E" Foreground="#FFC9C9C9" RenderTransformOrigin="2.412,-13.609" Grid.ColumnSpan="2"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,21,0,10" TextWrapping="Wrap" Foreground="#FF7E7E7E" Width="325" Grid.ColumnSpan="2"><Run Text="Import the outputs from an old InvokeAI installation."/><LineBreak/><Run/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
+        </Grid>
+
 
     </Grid>
 </Window>
